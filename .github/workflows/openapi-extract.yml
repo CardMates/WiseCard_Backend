@@ -1,0 +1,74 @@
+name: openapi-extract and diff with prod
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    types: [ closed ]
+
+jobs:
+  build-prod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main # prod
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Generate OpenAPI spec
+        run: ./gradlew clean generateOpenApiDocs
+
+      - uses: actions/upload-artifact@v4 # 아티팩트 업로드
+        with:
+          name: prod-spec
+          path: build/openapi.json
+
+      - name: Swagger UI Action
+        uses: Legion2/swagger-ui-action@v1.3.0
+        with:
+          output: swagger-ui
+          spec-file: build/openapi.json
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3  #gp-pages 브랜치 root에 swagger-ui push
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: swagger-ui
+
+  build-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/#1-project-setup  # dev 로 변경할 것
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Generate OpenAPI spec
+        run: ./gradlew clean generateOpenApiDocs
+
+      - uses: actions/download-artifact@v4 # 아티팩트 다운로드
+        with:
+          name: prod-spec
+          path: ./prod
+
+      - name: List downloaded prod artifact files # 경로 확인
+        run: ls -R ./prod
+
+
+      - name: Run openapi-diff with docker # 도커 허브에서 이미지 사용
+        run: docker run --rm -v ${{ github.workspace }}:/specs openapitools/openapi-diff:latest /specs/prod/openapi.json /specs/build/openapi.json --json /specs/diff.json
+
+      - name: Show diff result
+        run: cat diff.json
+

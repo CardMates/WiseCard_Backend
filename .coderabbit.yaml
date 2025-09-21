@@ -1,0 +1,30 @@
+language: "ko-KR"
+enable_free_tier: true
+reviews:
+  auto_review:
+    enabled: true          # 모든 브랜치에 대해 자동 리뷰 활성화
+    drafts: true           # Draft PR도 자동 리뷰할지 여부 (옵션)
+  profile: chill
+  request_changes_workflow: true
+  high_level_summary: true
+  high_level_summary_placeholder: '@coderabbitai 요약'
+  auto_title_placeholder: '@coderabbitai'
+  review_status: true
+  collapse_walkthrough: false
+  path_instructions:
+    - path: "**/*.java"
+      instructions: |
+        Review the Java code for adherence to the Google Java Style Guide.
+        Point out any violations of Java best practices, including effective OOP design, usage of annotations, exception handling, and resource management.
+        Recommend improvements for readability, maintainability, and performance.
+
+    - path: "**/test/**/*.java"
+      instructions: |
+        Review the test code for adherence to JUnit/TestNG best practices.
+        Ensure tests are isolated, use descriptive method names, and properly mock dependencies.
+        Point out missing edge case tests and recommend improvements for test coverage.
+
+    - path: "**/resources/*.yml"
+      instructions: |
+        Review configuration files for common mistakes, security risks, and best practice violations.
+        Suggest improvements for modularity, environment separation, and sensitive data handling.

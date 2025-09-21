@@ -1,0 +1,109 @@
+name: PR 리뷰 리마인더
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # 매일 정오 (한국 시간, UTC+9)
+  workflow_dispatch: # 수동 실행 트리거 추가
+jobs:
+  pr-review-pending-reminder:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+        # 열린 PR 정보를 gh 명령어로 조회
+      - name: Fetch Open PRs with Reviewers
+        id: fetch-prs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PRS=$(gh pr list --state open --json number,title,createdAt,reviewRequests | jq -c '.')
+          echo "$PRS" | jq .
+          echo "PRS=$PRS" >> $GITHUB_ENV
+
+
+      - name: Send Discord Notification
+        env:
+          USER_MAPPING: ${{ vars.USER_MAPPING }} # 깃허브 reviwer
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          if [ -z "$PRS" ]; then
+            echo "No open PRs pending greview."
+          else
+            TEMP_FILE=$(mktemp) # 임시 파일 생성
+            echo ":bell: **리뷰가 완료되지 않은 PR 목록:**\n" > "$TEMP_FILE"
+            jq -c '.[]' <<< "$PRS" | while IFS= read -r PR; do
+              echo "$PR" | jq .
+              NUMBER=$(echo "$PR" | jq '.number')
+              TITLE=$(echo "$PR" | jq -r '.title')
+              CREATED_AT=$(echo "$PR" | jq -r '.createdAt')
+
+              # 리뷰 요청자 목록과 완료된 리뷰어 목록 비교
+              REVIEWERS=$(echo "$PR" | jq -r '.reviewRequests[].login // empty')          
+          
+              PENDING_REVIEWERS=""
+              MAPPING_JSON=$USER_MAPPING
+              for REVIEWER in $REVIEWERS; do
+                DISCORD_ID=$(echo "$MAPPING_JSON" | jq -r --arg user "$REVIEWER" '.[$user] // ""')
+                if [ -n "$DISCORD_ID" ]; then
+                  PENDING_REVIEWERS+="<@$DISCORD_ID> "
+                else
+                  PENDING_REVIEWERS+="@$REVIEWER "
+                fi
+              done
+          
+              echo "$NUMBER - $TITLE - $CREATED_AT - $PENDING_REVIEWERS"
+              if [ -n "$PENDING_REVIEWERS" ]; then
+                echo "• [PR #$NUMBER - $TITLE](https://github.com/${{ github.repository }}/pull/$NUMBER)" >> "$TEMP_FILE"
+                echo "   → 생성일: $CREATED_AT" >> "$TEMP_FILE"
+                echo "   ↳ **리뷰 대기 중인 사람:** $PENDING_REVIEWERS" >> "$TEMP_FILE"
+                echo >> "$TEMP_FILE"
+              fi
+            done
+            MESSAGE=$(cat "$TEMP_FILE") # 임시 파일의 내용을 MESSAGE로 읽어오기
+            rm "$TEMP_FILE" # 임시 파일 삭제
+          
+            # echo "$MESSAGE"
+          
+            CLEANED_MESSAGE=$(echo "$MESSAGE" | tr -d '\000-\011\013-\037' | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g')
+          
+          
+          
+            if cmp -s "$TEMP_FILE" <(echo ":bell: **리뷰가 완료되지 않은 PR 목록:**\n"); then
+              echo ":white_check_mark: 모든 PR 리뷰가 완료되었습니다!" > "$TEMP_FILE"
+            fi
+          
+            # 1. JSON 안전성을 위한 특수 문자 처리
+            JSON_MESSAGE=$(echo "$CLEANED_MESSAGE" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' -e ':a;N;$!ba;s/\n/\\n/g')
+          
+            # 2. 문자열 길이 확인 (2000자 제한)
+            if [ ${#JSON_MESSAGE} -gt 2000 ]; then
+              echo "Error: 메시지가 너무 깁니다 (2000자 제한 초과)."
+              exit 1
+            fi
+          
+            # 3. JSON 데이터 생성
+            JSON_PAYLOAD="{\"content\": \"$JSON_MESSAGE\"}"
+          
+            # 4. JSON 유효성 검사
+            echo "$JSON_PAYLOAD" | jq empty
+            if [ $? -ne 0 ]; then
+              echo "Error: 유효하지 않은 JSON 데이터입니다."
+              exit 1
+            fi
+          
+            # 5. curl 명령어로 Discord Webhook에 메시지 전송
+            curl -X POST -H "Content-Type: application/json" \
+              -d "$JSON_PAYLOAD" \
+              "$DISCORD_WEBHOOK_URL"
+          
+            # 6. 전송 결과 확인
+            if [ $? -eq 0 ]; then
+              echo "메시지가 성공적으로 전송되었습니다!"
+            else
+              echo "Error: 메시지 전송에 실패했습니다."
+            fi
+          fi
+          
+          
