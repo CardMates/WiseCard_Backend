@@ -86,10 +86,16 @@ jobs:
           
           echo "현재 사용자: $(whoami)"
           ls -l ~/.docker/config.json
+          
+          mkdir -p ~/.docker
+          chmod 700 ~/.docker
   
   
           # Docker 레지스트리 로그인 (PAT은 안전하게 관리)
           echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+                  
+          ls -l ~/.docker/config.json
+          cat ~/.docker/config.json
           
           # 최신 코드 가져오기
           git fetch origin
