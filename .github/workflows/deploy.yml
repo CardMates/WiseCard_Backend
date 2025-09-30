@@ -95,8 +95,8 @@ jobs:
           # Docker 레지스트리 로그인 (PAT은 안전하게 관리)
           echo "$GHCR_PAT" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
                   
-          ls -l ~/.docker/config.json
-          cat ~/.docker/config.json
+          ls -l ~/snap/docker/current/.docker/config.json
+          cat ~/snap/docker/current/.docker/config.json
           
           # 최신 코드 가져오기
           git fetch origin
