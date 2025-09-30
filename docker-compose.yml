@@ -1,18 +1,17 @@
-version: '3.8'
 
 services:
   # Redis는 AWS ElastiCache를 사용하므로 로컬 컨테이너 제거
 
   # WiseCard Backend 애플리케이션
   app:
-    image: ghcr.io/juanxiu/wisecard_backend:latest
+    image: ghcr.io/cardmates/wisecard_backend:latest
     container_name: wisecard-backend
     restart: unless-stopped
     environment:
       SPRING_PROFILES_ACTIVE: prod
       # AWS RDS 연결 정보
       DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT:-5432}
+      DB_PORT: ${DB_PORT:-3306}
       DB_NAME: ${DB_NAME}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
