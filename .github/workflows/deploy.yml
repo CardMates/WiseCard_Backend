@@ -81,7 +81,11 @@ jobs:
           # EC2 서버에서 실행할 배포 스크립트
           cd /home/ubuntu/WiseCard_Backend
           
-          # 최신 코드 가져오기
+          # Docker 레지스트리 로그인 (PAT은 안전하게 관리)
+          echo "$GHCR_PAT" | docker login ghcr.io -u juanxiu --password-stdin
+  
+
+  # 최신 코드 가져오기
           git fetch origin
           git reset --hard origin/main
           
@@ -90,7 +94,7 @@ jobs:
           DB_HOST=${{ secrets.DB_HOST }}
           DB_NAME=db-wisecard
           DB_USERNAME=admin
-          DB_PASSWORD=${{ secrets.DB_PASSWORD}}
+          DB_PASSWORD=${{secrets.DB_PASSWORD}}
           DB_PORT=3306
           REDIS_HOST=redis-wisecard
           REDIS_PORT=6379
@@ -102,10 +106,11 @@ jobs:
           
           # Docker 이미지 풀 및 데몬 시작 
           docker-compose down
-          docker-compose pull #로컬빌드 X
-          docker-compose up -d
-          
-          # 헬스체크 (최대 5분 대기)
+          docker-compose pull || { echo "docker-compose pull failed"; exit 1; }
+          docker-compose up -d || { echo "docker-compose up failed"; exit 1; }
+  
+
+  # 헬스체크 (최대 5분 대기)
           echo "헬스체크 시작..."
           for i in {1..30}; do
             if curl -f http://localhost:8080/actuator/health > /dev/null 2>&1; then
