@@ -51,6 +51,9 @@ dependencies {
     // H2 데이터베이스 (테스트용)
     runtimeOnly 'com.h2database:h2'
     
+    // MySQL 데이터베이스 (프로덕션용)
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    
     // Redis 의존성 (Lettuce 기본 포함 )
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
