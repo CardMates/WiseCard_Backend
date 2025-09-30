@@ -91,9 +91,9 @@ jobs:
           GRPC_PORT=9091
           EOF
           
-          # Docker 이미지 빌드 및 시작
+          # Docker 이미지 풀 및 데몬 시작 
           docker-compose down
-          docker-compose build --no-cache
+          docker-compose pull #로컬빌드 X
           docker-compose up -d
           
           # 헬스체크 (최대 5분 대기)
