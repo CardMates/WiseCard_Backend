@@ -11,6 +11,7 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: cardmates/wisecard_backend
 
+
 jobs:
   build-and-push:
 #    needs: test
@@ -71,7 +72,9 @@ jobs:
         aws-region: ap-northeast-2
 
     - name: Deploy to EC2
-      uses: apply/ssh-action@v1.0.0
+      uses: appleboy/ssh-action@v1.0.0
+      env:
+        GHCR_PAT: ${{ secrets.GHCR_PAT }}
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ubuntu
