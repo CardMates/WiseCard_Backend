@@ -71,6 +71,15 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ap-northeast-2
 
+    - name: Setup SSH agent
+      uses: webfactory/ssh-agent@v0.8.1
+      with:
+        ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+    - name: Copy docker-compose.yml to EC2
+      run: |
+        scp -o StrictHostKeyChecking=no docker-compose.yml ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/WiseCard_Backend/docker-compose.yml
+
     - name: Deploy to EC2
       uses: appleboy/ssh-action@v1.0.0
       env:
@@ -87,7 +96,6 @@ jobs:
           
           echo "현재 사용자: $(whoami)"
           echo "GHCR_PAT is: $GHCR_PAT"
-  
   
           # Docker 레지스트리 로그인 (PAT은 안전하게 관리)
           echo "$GHCR_PAT" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
@@ -109,6 +117,7 @@ jobs:
           APP_PORT=8080
           GRPC_PORT=9091
           EOF
+          
           
           # Docker 이미지 풀 및 데몬 시작 
           docker compose down
