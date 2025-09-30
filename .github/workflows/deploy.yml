@@ -111,9 +111,9 @@ jobs:
           EOF
           
           # Docker 이미지 풀 및 데몬 시작 
-          docker-compose down
-          docker-compose --verbose pull || { echo "docker-compose pull failed"; exit 1; }
-          docker-compose up -d || { echo "docker-compose up failed"; exit 1; }
+          docker compose down
+          docker compose pull || { echo "docker-compose pull failed"; exit 1; }
+          docker compose up -d || { echo "docker-compose up failed"; exit 1; }
           
           # 헬스체크 (최대 5분 대기)
           echo "헬스체크 시작..."
