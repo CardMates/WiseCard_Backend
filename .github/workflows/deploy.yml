@@ -85,9 +85,6 @@ jobs:
           # EC2 서버에서 실행할 배포 스크립트
           cd /home/ubuntu/WiseCard_Backend
           
-          mkdir -p ~/.docker
-          chmod 700 ~/.docker
-          
           echo "현재 사용자: $(whoami)"
           echo "GHCR_PAT is: $GHCR_PAT"
   
@@ -97,11 +94,7 @@ jobs:
                   
           ls -l ~/snap/docker/current/.docker/config.json
           cat ~/snap/docker/current/.docker/config.json
-          
-          # 최신 코드 가져오기
-          git fetch origin
-          git reset --hard origin/main
-          
+        
           # 환경변수 파일 업데이트
           cat > .env << EOF
           DB_HOST=${{ secrets.DB_HOST }}
@@ -119,7 +112,7 @@ jobs:
           
           # Docker 이미지 풀 및 데몬 시작 
           docker-compose down
-          docker-compose pull || { echo "docker-compose pull failed"; exit 1; }
+          docker-compose --verbose pull || { echo "docker-compose pull failed"; exit 1; }
           docker-compose up -d || { echo "docker-compose up failed"; exit 1; }
           
           # 헬스체크 (최대 5분 대기)
