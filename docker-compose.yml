@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # Redis는 AWS ElastiCache를 사용하므로 로컬 컨테이너 제거
+
+  # WiseCard Backend 애플리케이션
+  app:
+    image: ghcr.io/juanxiu/wisecard_backend:latest
+    container_name: wisecard-backend
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      # AWS RDS 연결 정보
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      # AWS ElastiCache Redis 연결 정보
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      # 외부 API 키
+      APP_API_KAKAO_KEY: ${APP_API_KAKAO_KEY:-}
+    ports:
+      - "${APP_PORT:-8080}:8080"
+      - "${GRPC_PORT:-9091}:9091"
+    volumes:
+      - app_logs:/app/logs
+    networks:
+      - wisecard-network
+    # Redis는 AWS ElastiCache를 사용하므로 의존성 제거
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Nginx 리버스 프록시 (선택사항)
+  nginx:
+    image: nginx:alpine
+    container_name: wisecard-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    networks:
+      - wisecard-network
+    depends_on:
+      - app
+
+volumes:
+  app_logs:
+    driver: local
+
+networks:
+  wisecard-network:
+    driver: bridge
