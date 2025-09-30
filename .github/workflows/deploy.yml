@@ -80,19 +80,20 @@ jobs:
         username: ubuntu
         key: ${{ secrets.EC2_SSH_KEY }}
         port: 22
+        envs: GHCR_PAT
         script: |
           # EC2 서버에서 실행할 배포 스크립트
           cd /home/ubuntu/WiseCard_Backend
           
-          echo "현재 사용자: $(whoami)"
-          ls -l ~/.docker/config.json
-          
           mkdir -p ~/.docker
           chmod 700 ~/.docker
+          
+          echo "현재 사용자: $(whoami)"
+          echo "GHCR_PAT is: $GHCR_PAT"
   
   
           # Docker 레지스트리 로그인 (PAT은 안전하게 관리)
-          echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          echo "$GHCR_PAT" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
                   
           ls -l ~/.docker/config.json
           cat ~/.docker/config.json
