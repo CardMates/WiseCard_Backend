@@ -34,15 +34,24 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} #이미지 경로 docker compose 와 일치하도록
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          latest
 
+# 빌드된 이미지 GitHub Container Registry(ghcr.io)에 푸시
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
         context: .
         push: true
         tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
+
+    - name: Verify image push
+      run: |
+        docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+        docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+        docker images | grep ${{ env.IMAGE_NAME }}
+
 
   deploy:
 #    needs: [test, build-and-push]
@@ -79,9 +88,9 @@ jobs:
           # 환경변수 파일 업데이트
           cat > .env << EOF
           DB_HOST=${{ secrets.DB_HOST }}
-          DB_NAME= db-wisecard
-          DB_USERNAME= admin
-          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_NAME=db-wisecard
+          DB_USERNAME=admin
+          DB_PASSWORD=${{ secrets.DB_PASSWORD}}
           DB_PORT=3306
           REDIS_HOST=redis-wisecard
           REDIS_PORT=6379
