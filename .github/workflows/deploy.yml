@@ -84,6 +84,8 @@ jobs:
           # EC2 서버에서 실행할 배포 스크립트
           cd /home/ubuntu/WiseCard_Backend
           
+          echo "GHCR_PAT is: $GHCR_PAT"
+          
           # Docker 레지스트리 로그인 (PAT은 안전하게 관리)
           echo "$GHCR_PAT" | docker login ghcr.io -u juanxiu --password-stdin
           
