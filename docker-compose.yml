@@ -56,6 +56,6 @@ volumes:
   app_logs:
     driver: local
 
-#networks:
-#  wisecard-network:
-#    driver: bridge
+networks:
+  wisecard-network:
+    driver: bridge
