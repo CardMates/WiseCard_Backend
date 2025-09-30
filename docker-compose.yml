@@ -5,7 +5,7 @@ services:
 
   # WiseCard Backend 애플리케이션
   app:
-    image: ghcr.io/juanxiu/wisecard_backend:latest
+    image: ghcr.io/cardmates/wisecard_backend:latest
     container_name: wisecard-backend
     restart: unless-stopped
     environment:
