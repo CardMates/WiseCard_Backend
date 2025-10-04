@@ -116,6 +116,7 @@ jobs:
           APP_API_KAKAO_KEY=${{ secrets.APP_API_KAKAO_KEY }}
           APP_PORT=8080
           GRPC_PORT=9091
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
           EOF
           
           
