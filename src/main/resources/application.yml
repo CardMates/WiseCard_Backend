@@ -13,7 +13,6 @@ spring:
       enabled: true
 
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: create-drop
 
@@ -46,6 +45,6 @@ app:
       key: ${APP_API_KAKAO_KEY:}
 
 jwt:
-  secret: ${JWT_SECRET:}
+  secret: ${JWT_SECRET:F0yB5JUd9/gAE2egZg09KmpnZA0KVFhMtxqiMIcYLu4nDOhR9K2zNhJoz0tKU6E3qOlQkc752ycdFee76i33gg==}
   access-token-expiration-time: 1209600000 # 14 day = 14 * 1000 * 60 * 60 * 24
   refresh-token-expiration-time: 15552000000 # 180day
