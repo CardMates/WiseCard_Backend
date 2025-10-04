@@ -79,7 +79,7 @@ jobs:
 
     - name: Copy docker-compose.yml to EC2
       run: |
-        scp -o StrictHostKeyChecking=no docker-compose.yml ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/WiseCard_Backend/docker-compose.yml
+        scp -o StrictHostKeyChecking=no docker-compose.yml ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/server/docker-compose.yml
 
     - name: Deploy to EC2
       uses: appleboy/ssh-action@v1.0.0
@@ -93,7 +93,7 @@ jobs:
         envs: GHCR_PAT
         script: |
           # EC2 서버에서 실행할 배포 스크립트
-          cd /home/ubuntu/WiseCard_Backend
+          cd /home/ubuntu/server
           
           echo "현재 사용자: $(whoami)"
           echo "GHCR_PAT is: $GHCR_PAT"
