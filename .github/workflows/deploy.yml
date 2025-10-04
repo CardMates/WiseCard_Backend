@@ -89,7 +89,7 @@ jobs:
         username: ubuntu
         key: ${{ secrets.EC2_SSH_KEY }}
         port: 22
-        envs: [GHCR_PAT]
+        envs: GHCR_PAT
         script: |
           # EC2 서버에서 실행할 배포 스크립트
           cd /home/ubuntu/WiseCard_Backend
