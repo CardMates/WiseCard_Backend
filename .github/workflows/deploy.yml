@@ -11,6 +11,7 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: cardmates/wisecard_backend
 
+
 jobs:
   build-and-push:
 #    needs: test
@@ -43,6 +44,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
+        file: ./Dockerfile
         push: true
         tags: ${{ steps.meta.outputs.tags }}
 
@@ -70,66 +72,61 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ap-northeast-2
 
+    - name: Setup SSH agent
+      uses: webfactory/ssh-agent@v0.9.0
+      with:
+        ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+    - name: Copy docker-compose.yml to EC2
+      run: |
+        scp -o StrictHostKeyChecking=no docker-compose.yml ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/server/docker-compose.yml
+
     - name: Deploy to EC2
       uses: appleboy/ssh-action@v1.0.0
+      env:
+        GHCR_PAT: ${{ secrets.GHCR_PAT }}
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ubuntu
         key: ${{ secrets.EC2_SSH_KEY }}
         port: 22
+        envs: GHCR_PAT
         script: |
           # EC2 서버에서 실행할 배포 스크립트
-          cd /home/ubuntu/WiseCard_Backend
+          cd /home/ubuntu/server
           
-          # Docker 레지스트리 로그인 (PAT은 안전하게 관리)
-          echo "$GHCR_PAT" | docker login ghcr.io -u juanxiu --password-stdin
+          echo "현재 사용자: $(whoami)"
+          echo "GHCR_PAT is: $GHCR_PAT"
   
-
-  # 최신 코드 가져오기
-          git fetch origin
-          git reset --hard origin/main
-          
+          # Docker 레지스트리 로그인 (PAT은 안전하게 관리)
+          echo "$GHCR_PAT" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+                  
+          ls -l ~/snap/docker/current/.docker/config.json
+          cat ~/snap/docker/current/.docker/config.json
+        
           # 환경변수 파일 업데이트
           cat > .env << EOF
           DB_HOST=${{ secrets.DB_HOST }}
           DB_NAME=db-wisecard
           DB_USERNAME=admin
-          DB_PASSWORD=${{secrets.DB_PASSWORD}}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
           DB_PORT=3306
-          REDIS_HOST=redis-wisecard
+          REDIS_HOST=172.17.0.1
           REDIS_PORT=6379
-          REDIS_PASSWORD=
+          REDIS_PASSWORD=1234
           APP_API_KAKAO_KEY=${{ secrets.APP_API_KAKAO_KEY }}
           APP_PORT=8080
           GRPC_PORT=9091
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
           EOF
           
+          
           # Docker 이미지 풀 및 데몬 시작 
-          docker-compose down
-          docker-compose pull || { echo "docker-compose pull failed"; exit 1; }
-          docker-compose up -d || { echo "docker-compose up failed"; exit 1; }
-  
+          docker compose down
+          docker compose pull || { echo "docker-compose pull failed"; exit 1; }
+          docker compose up -d || { echo "docker-compose up failed"; exit 1; }
+          
 
-  # 헬스체크 (최대 5분 대기)
-          echo "헬스체크 시작..."
-          for i in {1..30}; do
-            if curl -f http://localhost:8080/actuator/health > /dev/null 2>&1; then
-              echo "애플리케이션이 정상적으로 시작되었습니다."
-              break
-            fi
-            echo "헬스체크 시도 $i/30 - 대기 중..."
-            sleep 10
-          done
-          
-          # 최종 헬스체크
-          if ! curl -f http://localhost:8080/actuator/health; then
-            echo "배포 실패 - 롤백을 시도합니다."
-            docker-compose down
-            docker-compose up -d
-            exit 1
-          fi
-          
-          # 불필요한 이미지 정리
-          docker image prune -f
+          # docker image prune -f
           
           echo "배포가 성공적으로 완료되었습니다!"
