@@ -1,6 +1,11 @@
-
 services:
-  # Redis는 AWS ElastiCache를 사용하므로 로컬 컨테이너 제거
+  # Redis 컨테이너 추가
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: unless-stopped
+    networks:
+      - wisecard-network
 
   # WiseCard Backend 애플리케이션
   app:
@@ -29,6 +34,8 @@ services:
     #  - app_logs:/app/logs
     networks:
       - wisecard-network
+    depends_on:
+      - redis
     # Redis는 AWS ElastiCache를 사용하므로 의존성 제거
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
