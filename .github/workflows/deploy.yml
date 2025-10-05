@@ -111,7 +111,7 @@ jobs:
           DB_USERNAME=admin
           DB_PASSWORD=${{ secrets.DB_PASSWORD }}
           DB_PORT=3306
-          REDIS_HOST=localhost
+          REDIS_HOST=172.17.0.1
           REDIS_PORT=6379
           REDIS_PASSWORD=1234
           APP_API_KAKAO_KEY=${{ secrets.APP_API_KAKAO_KEY }}
