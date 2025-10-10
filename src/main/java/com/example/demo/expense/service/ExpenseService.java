@@ -30,6 +30,7 @@ public class ExpenseService {
      * 2. 실적 중복 누적 방지
      * 3. 혜택 중복 적용 방지
      */
+    @Transactional
     public Expense saveExpenseFromPushNotification(PushNotificationRequest request) {
         String lockKey = String.format("expense:%s:%d", request.text(), request.postedAt());
         
@@ -45,7 +46,6 @@ public class ExpenseService {
     /**
      * 실제 소비내역 처리 로직 (분산락 내부에서 실행)
      */
-    @Transactional
     private Expense processExpenseFromPushNotification(PushNotificationRequest request) {
         // 텍스트 파싱
         ExpenseParsingService.ParsedExpenseData parsedData = 
@@ -57,6 +57,7 @@ public class ExpenseService {
         
         // 소비내역 엔티티 생성
         Expense expense = Expense.builder()
+                // TODO: accessToken으로 식별한 유저ID 가져올 것
                 .userId(1L) // 고정 사용자 ID
                 .place(parsedData.getPlace())
                 .amount(parsedData.getAmount())
