@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.auth.util.AuthUtils;
 import com.example.demo.card.entity.Card;
 import com.example.demo.card.repository.CardRepository;
 import com.example.demo.store.dto.*;
@@ -31,7 +32,7 @@ public class OfflineStoreController {
     public ResponseEntity<StoreSearchResponse> searchStoresWithCards(
             @RequestBody StoreSearchRequest request) {
         
-        Long userId = 1L;
+        Long userId = AuthUtils.getMemberId();
 
         // 1. 사용자 카드 목록 조회
         List<Card> userCards = cardRepository.findByUserId(userId);

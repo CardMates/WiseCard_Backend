@@ -24,30 +24,26 @@ public class UserCardRegistrationService {
 
     // 사용자 카드 등록
     @Transactional
-    public CardWithBenefitResponse registerCardToUser(UserCardRegistrationRequest request) {
-        log.info("사용자 카드 등록 요청 - 사용자: {}, 카드: {}", request.userId(), request.cardId());
+    public CardWithBenefitResponse registerCardToUser(Long userId, Long cardId) {
 
         // 카드 존재 확인
-        Card card = cardRepository.findById(request.cardId())
-                .orElseThrow(() -> new RuntimeException("카드를 찾을 수 없습니다: " + request.cardId()));
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new RuntimeException("카드를 찾을 수 없습니다: " + cardId));
 
         // 이미 등록된 카드인지 확인
-        if (userCardRepository.existsByUserIdAndCard_IdAndIsActiveTrue(request.userId(), request.cardId())) {
-            log.warn("이미 등록된 카드입니다 - 사용자: {}, 카드: {}", request.userId(), request.cardId());
+        if (userCardRepository.existsByUserIdAndCard_IdAndIsActiveTrue(userId, cardId)) {
             throw new RuntimeException("이미 등록된 카드입니다");
         }
 
         // UserCard 엔티티 생성
         UserCard userCard = UserCard.builder()
-                .userId(request.userId())
+                .userId(userId)
                 .card(card)
                 .isActive(true)
                 .build();
 
         // 저장
         userCardRepository.save(userCard);
-        
-        log.info("사용자 카드 등록 완료 - 사용자: {}, 카드: {}", request.userId(), request.cardId());
 
         // 응답 DTO 생성
         return CardWithBenefitResponse.builder()
