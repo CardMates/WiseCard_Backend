@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.auth.util.AuthUtils;
 import com.example.demo.benefit.dto.MatchingCardsResponse;
 import com.example.demo.benefit.service.OptimalBenefitService;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class BenefitController {
     public ResponseEntity<MatchingCardsResponse> getMatchingCards(
             @RequestParam String storeName) {
 
-        Long userId = 1L; // 고정 사용자 ID
+        Long userId = AuthUtils.getMemberId();
 
         try {
             MatchingCardsResponse response = optimalBenefitService.getMatchingCardsWithRealTimeFilter(
