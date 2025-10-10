@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import java.util.List;
 
+import com.example.demo.auth.util.AuthUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,19 +39,18 @@ public class CardController {
             @RequestParam(required = false) String cardType,
             @RequestParam(required = false) String cardName) {
         
-        log.info("카드 조회 요청 - 카드사: {}, 카드타입: {}, 카드명: {}", cardBank, cardType, cardName);
-        
         List<CardWithBenefitResponse> cards = getCardService.getCards(cardBank, cardType, cardName);
         return ResponseEntity.ok(cards);
     }
 
     // 사용자 카드 등록 
     @PostMapping("/register")
-    public ResponseEntity<CardWithBenefitResponse> registerCardToUser(@RequestBody UserCardRegistrationRequest request) {
-        log.info("사용자 카드 등록 요청 - 사용자: {}, 카드: {}", request.userId(), request.cardId());
-        
+    public ResponseEntity<CardWithBenefitResponse> registerCardToUser(@RequestParam Long cardId) {
+
+        Long userId = AuthUtils.getMemberId();
+
         try {
-            CardWithBenefitResponse registeredCard = userCardRegistrationService.registerCardToUser(request);
+            CardWithBenefitResponse registeredCard = userCardRegistrationService.registerCardToUser(userId, cardId);
             return ResponseEntity.status(HttpStatus.CREATED).body(registeredCard);
             
         } catch (RuntimeException e) {
@@ -63,10 +63,11 @@ public class CardController {
     }
 
     // 사용자 카드 등록 해제 
-    @PostMapping("/unregister/{userId}/{cardId}")
-    public ResponseEntity<Void> unregisterCardFromUser(@PathVariable Long userId, @PathVariable Long cardId) {
-        log.info("사용자 카드 등록 해제 요청 - 사용자: {}, 카드: {}", userId, cardId);
-        
+    @PostMapping("/unregister/{cardId}")
+    public ResponseEntity<Void> unregisterCardFromUser(@PathVariable Long cardId) {
+
+        Long userId = AuthUtils.getMemberId();
+
         try {
             userCardRegistrationService.unregisterCardFromUser(userId, cardId);
             return ResponseEntity.ok().build();
@@ -81,15 +82,13 @@ public class CardController {
     }
 
     // 사용자별 보유 카드 리스트 조회 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/user")
     public ResponseEntity<List<CardWithBenefitResponse>> getCardsByUserId(
-            @PathVariable Long userId,
             @RequestParam(required = false) String cardBank,
             @RequestParam(required = false) String cardType,
             @RequestParam(required = false) String cardName) {
-        
-        log.info("사용자 카드 조회 요청 - 사용자: {}, 카드사: {}, 카드타입: {}, 카드명: {}", 
-                userId, cardBank, cardType, cardName);
+
+        Long userId = AuthUtils.getMemberId();
         
         List<CardWithBenefitResponse> cards = userCardService.getUserCards(userId, cardBank, cardType, cardName);
         return ResponseEntity.ok(cards);

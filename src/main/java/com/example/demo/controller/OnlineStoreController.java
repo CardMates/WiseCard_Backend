@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.auth.util.AuthUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,7 +33,7 @@ public class OnlineStoreController {
             @RequestParam(required = false) String category) {
             
             
-        Long userId = 1L; // 고정 사용자 ID
+        Long userId = AuthUtils.getMemberId();
         
         OnlineStoreSearchResponse response = onlineStoreService.searchOnlineStores(category, userId);
         
@@ -48,7 +49,7 @@ public class OnlineStoreController {
     public ResponseEntity<MatchingCardsResponse> getStoreCards(
             @PathVariable String storeName) {
 
-        Long userId = 1L; // 고정 사용자 ID
+        Long userId = AuthUtils.getMemberId();
         
         try {
             MatchingCardsResponse response = optimalBenefitService.getMatchingCardsWithRealTimeFilter(storeName, userId);

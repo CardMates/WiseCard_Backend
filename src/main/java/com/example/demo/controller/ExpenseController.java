@@ -25,6 +25,8 @@ public class ExpenseController {
      * - 동일한 푸시 알림 중복 처리 방지
      * - 여러 서버 인스턴스 간 동시 처리 방지
      */
+
+    // TODO: 사용자 식별 로직 필요
     @PostMapping("/push-notification")
     public ResponseEntity<Expense> saveExpenseFromPushNotification(
             @RequestBody PushNotificationRequest request) {
