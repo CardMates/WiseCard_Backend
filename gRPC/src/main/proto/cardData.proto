@@ -2,64 +2,72 @@ syntax = "proto3";
 
 package com.sub.grpc;
 
-// 온라인/오프라인/BOTH 구분
+import "google/protobuf/empty.proto";
+import "cardCompany.proto";
+
 enum ChannelType {
   ONLINE = 0;
   OFFLINE = 1;
   BOTH = 2;
 }
 
-// 할인 혜택
+enum CardType {
+  CREDIT = 0;
+  DEBIT = 1;
+}
+
 message DiscountBenefit {
-  int64 id = 6; // 변경 식별용 id 추가
-  double rate = 1;           // 정률 할인 (0이면 null)
-  double amount = 2;         // 정액 할인 (0이면 null)
-  int64 minimum_amount = 3;  // 최소 결제 금액 (0이면 null)
-  int64 benefit_limit = 4;   // 최대 혜택 한도 (0이면 null)
-  ChannelType channel = 5;   // 온라인/오프라인/BOTH
+  double rate = 1;           // 정률 할인
+  int32 amount = 2;         // 정액 할인
+  int32 minimum_amount = 3;  // 최소 결제 금액
+  int32 benefit_limit = 4;   // 최대 혜택 한도
+  int32 minimum_spending = 5; // 전월 최소 실적 (원 단위)
+  ChannelType channel = 6;   // 온라인/오프라인/BOTH
 }
 
-// 포인트 적립 혜택
 message PointBenefit {
-  int64 id = 6; // 변경 식별용 id 추가
-  double rate = 1;           // 적립률 (0이면 null)
-  int64 minimum_amount = 2;  // 최소 결제 금액 (0이면 null)
-  int64 benefit_limit = 3;   // 최대 혜택 한도 (0이면 null)
-  ChannelType channel = 4;   // 온라인/오프라인/BOTH
+  string name = 1;            //포인트 이름
+  int32 amount = 2;          //적립금
+  double rate = 3;           // 적립률
+  int32 minimum_amount = 4;  // 최소 결제 금액
+  int32 benefit_limit = 5;   // 최대 혜택 한도
+  int32 minimum_spending = 6; // 전월 최소 실적 (원 단위)
+  ChannelType channel = 7;   // 온라인/오프라인/BOTH
 }
 
-// 캐시백 혜택
 message CashbackBenefit {
-  int64 id = 6; // 변경 식별용 id 추가
-  double rate = 1;           // 캐시백률 (0이면 null)
-  double amount = 2;         // 정액 캐시백 (0이면 null)
-  int64 minimum_amount = 3;  // 최소 결제 금액 (0이면 null)
-  int64 benefit_limit = 4;   // 최대 혜택 한도 (0이면 null)
-  ChannelType channel = 5;   // 온라인/오프라인/BOTH
+  double rate = 1;           // 캐시백률
+  int32 amount = 2;         // 정액 캐시백
+  int32 minimum_amount = 3;  // 최소 결제 금액
+  int32 benefit_limit = 4;   // 최대 혜택 한도
+  int32 minimum_spending = 5; // 전월 최소 실적 (원 단위)
+  ChannelType channel = 6;   // 온라인/오프라인/BOTH
 }
 
-// 카드 단위
 message Benefit {
-  int64 benefit_id = 1;                    // 혜택 고유 ID (기존 혜택 식별용) -> 추가한 것 
-  repeated DiscountBenefit discounts = 2;  // 할인 혜택 배열
-  repeated PointBenefit points = 3;        // 포인트 혜택 배열
-  repeated CashbackBenefit cashbacks = 4;  // 캐시백 혜택 배열
-  repeated string applicable_category = 5; // 카카오맵 업종 코드 (MT1, FD6, CE7 ...)
-  repeated string applicable_targets = 6;  // 브랜드명 또는 한글 설명
+  repeated DiscountBenefit discounts = 1;       // 할인 혜택 배열
+  repeated PointBenefit points = 2;            // 포인트 혜택 배열
+  repeated CashbackBenefit cashbacks = 3;      // 캐시백 혜택 배열
+  repeated string categories = 4;     // 카카오맵 업종 코드 (MT1, FD6, CE7 ...)
+  repeated string targets = 5;      // 브랜드명 또는 한글 설명
+  string summary = 6; //한줄 요약
 }
 
-message CrawledBenefit {
-  int64 card_id = 6; // 변경 식별용 id 추가
-  string card_bank = 1; // 카드사
-  string card_name = 2; //카드명
-  string img_url = 3; //카드 이미지
-  string type = 4; //CreditCard|DebitCard
-  repeated Benefit benefits = 5; // 카드에 속한 여러 혜택
+message CardBenefit {
+  int32 card_id = 1; // 카드 id
+  CardCompany card_company = 2; // 카드사
+  string card_name = 3; //카드명
+  string img_url = 4; //카드 이미지
+  CardType card_type = 5; //CREDIT|DEBIT
+  repeated Benefit benefits = 6; // 카드에 속한 여러 혜택
 }
 
-// 카드 여러 장 처리
-message CrawledBenefitList {
-  repeated CrawledBenefit crawledBenefit = 1;
+message CardBenefitList {
+  repeated CardBenefit cardBenefits = 1;
+}
+
+service CardService {
+  rpc receiveCardBenefits(CardBenefitList) returns (google.protobuf.Empty);
 }
 
 // 응답 메시지
@@ -71,5 +79,5 @@ message CardSaveResponse {
 
 // gRPC 서비스 정의
 service CardDataService {
-  rpc SaveCardData(CrawledBenefitList) returns (CardSaveResponse);
+  rpc SaveCardData(CardBenefitList) returns (CardSaveResponse);
 }

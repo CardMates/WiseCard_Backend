@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package com.sub.grpc;
+
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "cardCompany.proto";
+
+message CardPromotion {
+  CardCompany card_company = 1; // 카드사
+  string description = 2; // 프로모션 설명
+  string img_url = 3; // 프로모션 이미지
+  string url = 4; // 프로모션 링크
+  google.protobuf.Timestamp start_date = 5; // 시작 날짜
+  google.protobuf.Timestamp end_date = 6;   // 끝 날짜
+}
+
+message CardPromotionList {
+  repeated CardPromotion cardPromotion = 1;
+}
+
+service PromotionService {
+  rpc receivePromotions(CardPromotionList) returns (google.protobuf.Empty);
+}
