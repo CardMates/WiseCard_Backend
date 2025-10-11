@@ -54,17 +54,15 @@ public class Benefit {
     @OneToMany(mappedBy = "benefit", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<CashbackBenefit> cashbackBenefits = new ArrayList<>();
 
-    @Column(unique = true)
-    private Long externalId;
+    private String summary;
 
     @Builder
-    public Benefit(Card cardId, List<String> applicableCategory, List<String> applicableTargets, Long externalId) {
+    public Benefit(Card cardId, List<String> applicableCategory, List<String> applicableTargets, String summary) {
         this.cardId = cardId;
         this.applicableCategory = applicableCategory;
         this.applicableTargets = applicableTargets;
-        this.externalId = externalId;
+        this.summary = summary;
     }
-
 
 }
 

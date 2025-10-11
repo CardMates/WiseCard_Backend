@@ -1,6 +1,8 @@
 package com.example.demo.card.entity;
 
 import com.example.demo.benefit.entity.Benefit;
+import com.sub.grpc.CardCompanyOuterClass;
+import com.sub.grpc.CardData;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,24 +19,31 @@ public class Card {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String cardName;
-    private String cardBank;
+    @Enumerated(EnumType.STRING)
+    private CardCompany cardCompany;
+    @Enumerated(EnumType.STRING)
+    private CardType cardType;
     private String imgUrl;
     private String type;
 
     @OneToMany(mappedBy = "cardId", cascade = CascadeType.ALL)
     private List<Benefit> benefits = new ArrayList<>();
 
-    private Long externalId;
+
+    public enum CardCompany {
+        HANA, HYUNDAI, KOOKMIN, LOTTE, SAMSUNG, SHINHAN
+    }
+    public enum CardType {
+        CREDIT, DEBIT
+    }
 
     @Builder
-    public Card(Long id, String cardName, String cardBank, String imgUrl, String type, List<Benefit> benefits, Long externalId) {
+    public Card(Long id, CardCompany cardCompany, CardType cardType, String imgUrl, String type, List<Benefit> benefits) {
         this.id = id;
-        this.cardName = cardName;
-        this.cardBank = cardBank;
+        this.cardCompany = cardCompany;
+        this.cardType = cardType;
         this.imgUrl = imgUrl;
         this.type = type;
         this.benefits = benefits != null ? benefits : new ArrayList<>();
-        this.externalId = externalId;
     }
 }
