@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 public class CardDataReceivedEvent {
-    private CardData.CrawledBenefitList crawledData;
+    private CardData.CardBenefitList cardBenefitList;
     private LocalDateTime receivedAt;
     private String source; // 크롤링 서버 식별자
 }

@@ -29,7 +29,7 @@ public class CardDataEventListener {
         
         try {
             // 실제 데이터 변경 감지 및 처리
-            changeDetectionService.processCardDataChanges(event.getCrawledData());
+            changeDetectionService.processCardDataChanges(event.getCardBenefitList());
             
             log.info("카드 데이터 변경 감지 및 처리 완료 - 소스: {}", event.getSource());
             

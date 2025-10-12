@@ -20,5 +20,8 @@ public interface CardRepository extends JpaRepository<Card,Long> {
     List<Card> findAllWithBenefits();
 
 
-    Optional<Card> findByExternalId(Long externalId);
+    Optional<Card> findByCardId(Integer cardId);
+    List<Card> findByCardCompany(Card.CardCompany cardCompany);
+    List<Card> findByCardType(Card.CardType cardType);
+
 }

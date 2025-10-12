@@ -28,5 +28,4 @@ public interface BenefitRepository extends JpaRepository<Benefit, Long> {
     @Query("SELECT b FROM Benefit b WHERE b.cardId.id = :cardId AND :place MEMBER OF b.applicableTargets")
     List<Benefit> findByCardIdAndPlace(@Param("cardId") Long cardId, @Param("place") String place);
 
-    Optional<Benefit> findByExternalId(Long externalId);
 }

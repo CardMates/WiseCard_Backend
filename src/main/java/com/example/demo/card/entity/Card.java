@@ -25,10 +25,12 @@ public class Card {
     private CardType cardType;
     private String imgUrl;
     private String type;
+    private String name;
 
     @OneToMany(mappedBy = "cardId", cascade = CascadeType.ALL)
     private List<Benefit> benefits = new ArrayList<>();
 
+    private Integer cardId; // proto 의 card_id 와 매핑
 
     public enum CardCompany {
         HANA, HYUNDAI, KOOKMIN, LOTTE, SAMSUNG, SHINHAN
@@ -38,12 +40,14 @@ public class Card {
     }
 
     @Builder
-    public Card(Long id, CardCompany cardCompany, CardType cardType, String imgUrl, String type, List<Benefit> benefits) {
+    public Card(Long id, CardCompany cardCompany, CardType cardType, String imgUrl, String type, List<Benefit> benefits, Integer cardId, String name) {
         this.id = id;
         this.cardCompany = cardCompany;
         this.cardType = cardType;
         this.imgUrl = imgUrl;
         this.type = type;
         this.benefits = benefits != null ? benefits : new ArrayList<>();
+        this.cardId = cardId;
+        this.name = name;
     }
 }

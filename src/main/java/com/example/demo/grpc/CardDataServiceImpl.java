@@ -19,15 +19,15 @@ public class CardDataServiceImpl extends CardDataServiceGrpc.CardDataServiceImpl
     private final ApplicationEventPublisher eventPublisher;
     
     @Override
-    public void saveCardData(CardData.CrawledBenefitList request, 
-                           StreamObserver<CardData.CardSaveResponse> responseObserver) {
+    public void saveCardData(CardData.CardBenefitList request,
+                             StreamObserver<CardData.CardSaveResponse> responseObserver) {
         
-        log.info("gRPC 요청 수신: {} 개의 카드 데이터", request.getCrawledBenefitCount());
+        log.info("gRPC 요청 수신: {} 개의 카드 데이터", request.getCardBenefitsList().size());
         
         try {
             // 1. 이벤트 발행 (비동기 처리로 모든 로직 처리)
             CardDataReceivedEvent event = CardDataReceivedEvent.builder()
-                    .crawledData(request)
+                    .cardBenefitList(request)
                     .receivedAt(LocalDateTime.now())
                     .source("crawler-server")
                     .build();
@@ -38,13 +38,13 @@ public class CardDataServiceImpl extends CardDataServiceGrpc.CardDataServiceImpl
             CardData.CardSaveResponse response = CardData.CardSaveResponse.newBuilder()
                     .setSuccess(true)
                     .setMessage("카드 데이터 처리 요청이 접수되었습니다. 비동기로 처리 중입니다.")
-                    .setSavedCount(request.getCrawledBenefitCount())
+                    .setSavedCount(request.getCardBenefitsList().size())
                     .build();
             
             responseObserver.onNext(response);
             responseObserver.onCompleted();
             
-            log.info("gRPC 응답 전송 완료: {} 개 처리 요청 접수", request.getCrawledBenefitCount());
+            log.info("gRPC 응답 전송 완료: {} 개 처리 요청 접수", request.getCardBenefitsList().size());
             
         } catch (Exception e) {
             log.error("gRPC 서비스 처리 중 오류 발생", e);
