@@ -54,7 +54,7 @@ public class AutomaticBenefitCalculationService {
                 }
                 
             } catch (Exception e) {
-                log.error("카드 {} 혜택 계산 실패", card.getCardName(), e);
+                log.error("카드 {} 혜택 계산 실패", card.getName(), e);
             }
         }
         
@@ -206,7 +206,7 @@ public class AutomaticBenefitCalculationService {
             
             userBenefitUsageRepository.save(usage);
             
-            log.info("할인 혜택 자동 적용 - 카드: {}, 할인금액: {}", card.getCardName(), discountAmount);
+            log.info("할인 혜택 자동 적용 - 카드: {}, 할인금액: {}", card.getName(), discountAmount);
         }
     }
     
@@ -255,7 +255,7 @@ public class AutomaticBenefitCalculationService {
             
             userBenefitUsageRepository.save(usage);
             
-            log.info("포인트 혜택 자동 적용 - 카드: {}, 포인트: {}", card.getCardName(), pointAmount);
+            log.info("포인트 혜택 자동 적용 - 카드: {}, 포인트: {}", card.getName(), pointAmount);
         }
     }
     
@@ -304,7 +304,7 @@ public class AutomaticBenefitCalculationService {
             
             userBenefitUsageRepository.save(usage);
             
-            log.info("캐시백 혜택 자동 적용 - 카드: {}, 캐시백: {}", card.getCardName(), cashbackAmount);
+            log.info("캐시백 혜택 자동 적용 - 카드: {}, 캐시백: {}", card.getName(), cashbackAmount);
         }
     }
     

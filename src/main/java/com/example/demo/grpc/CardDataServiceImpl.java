@@ -1,6 +1,6 @@
 package com.example.demo.grpc;
 
-import com.example.demo.event.CardDataReceivedEvent;
+import com.example.demo.event.CardData.CardDataReceivedEvent;
 import com.sub.grpc.CardDataServiceGrpc;
 import com.sub.grpc.CardData;
 import io.grpc.stub.StreamObserver;
@@ -22,7 +22,22 @@ public class CardDataServiceImpl extends CardDataServiceGrpc.CardDataServiceImpl
     public void saveCardData(CardData.CardBenefitList request,
                              StreamObserver<CardData.CardSaveResponse> responseObserver) {
         
+        log.info("=== gRPC CardDataServiceImpl.saveCardData 호출됨 ===");
         log.info("gRPC 요청 수신: {} 개의 카드 데이터", request.getCardBenefitsList().size());
+        log.info("요청 객체: {}", request);
+        
+        // 디버깅을 위한 상세 로그 추가
+        if (request.getCardBenefitsList().isEmpty()) {
+            log.warn("⚠️ 빈 카드 데이터가 수신되었습니다! Postman에서 올바른 데이터를 보내고 있는지 확인하세요.");
+        } else {
+            log.info("수신된 카드 데이터 상세 정보:");
+            for (int i = 0; i < request.getCardBenefitsList().size(); i++) {
+                var cardBenefit = request.getCardBenefitsList().get(i);
+                log.info("  카드 {}: ID={}, 이름={}, 회사={}, 혜택수={}", 
+                    i+1, cardBenefit.getCardId(), cardBenefit.getCardName(), 
+                    cardBenefit.getCardCompany(), cardBenefit.getBenefitsList().size());
+            }
+        }
         
         try {
             // 1. 이벤트 발행 (비동기 처리로 모든 로직 처리)

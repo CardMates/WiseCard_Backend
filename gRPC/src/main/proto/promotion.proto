@@ -23,3 +23,15 @@ message CardPromotionList {
 service PromotionService {
   rpc receivePromotions(CardPromotionList) returns (google.protobuf.Empty);
 }
+
+// 응답 메시지
+message PromotionSaveResponse {
+  bool success = 1;
+  string message = 2;
+  int32 saved_count = 3;
+}
+
+// API 서버 저장 서비스
+service CardPromotionService{
+  rpc SavedPromotions(CardPromotionList) returns (PromotionSaveResponse);
+}

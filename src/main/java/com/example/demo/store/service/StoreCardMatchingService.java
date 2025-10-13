@@ -64,7 +64,7 @@ public class StoreCardMatchingService {
             if (!matchingBenefits.isEmpty()) {
                 CardBenefitDTO cardInfo = CardBenefitDTO.builder()
                     .cardId(card.getId())
-                    .cardName(card.getCardName())
+                    .cardName(card.getName())
                     .benefits(matchingBenefits)
                     .build();
 

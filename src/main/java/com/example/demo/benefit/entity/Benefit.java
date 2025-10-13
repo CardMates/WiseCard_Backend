@@ -57,8 +57,7 @@ public class Benefit {
     private String summary;
 
     @Builder
-    public Benefit(Card cardId, List<String> applicableCategory, List<String> applicableTargets, String summary) {
-        this.cardId = cardId;
+    public Benefit(List<String> applicableCategory, List<String> applicableTargets, String summary) {
         this.applicableCategory = applicableCategory;
         this.applicableTargets = applicableTargets;
         this.summary = summary;

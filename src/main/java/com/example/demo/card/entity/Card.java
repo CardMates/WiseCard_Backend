@@ -27,9 +27,17 @@ public class Card {
     private String type;
     private String name;
 
-    @OneToMany(mappedBy = "cardId", cascade = CascadeType.ALL)
-    private List<Benefit> benefits = new ArrayList<>();
+    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<CardBenefit> cardBenefits = new ArrayList<>();
 
+    // 기존 코드와의 호환성을 위한 메서드
+    public List<Benefit> getBenefits() {
+        return cardBenefits.stream()
+                .map(CardBenefit::getBenefit)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    @Column(name = "card_id", unique = true)
     private Integer cardId; // proto 의 card_id 와 매핑
 
     public enum CardCompany {
@@ -40,13 +48,13 @@ public class Card {
     }
 
     @Builder
-    public Card(Long id, CardCompany cardCompany, CardType cardType, String imgUrl, String type, List<Benefit> benefits, Integer cardId, String name) {
+    public Card(Long id, CardCompany cardCompany, CardType cardType, String imgUrl, String type, List<CardBenefit> cardBenefits, Integer cardId, String name) {
         this.id = id;
         this.cardCompany = cardCompany;
         this.cardType = cardType;
         this.imgUrl = imgUrl;
         this.type = type;
-        this.benefits = benefits != null ? benefits : new ArrayList<>();
+        this.cardBenefits = cardBenefits != null ? cardBenefits : new ArrayList<>();
         this.cardId = cardId;
         this.name = name;
     }

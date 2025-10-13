@@ -1,5 +1,6 @@
 package com.example.demo.user.service;
 
+import com.example.demo.benefit.util.ProtoMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ public class UserCardRegistrationService {
     private final UserCardRepository userCardRepository;
     private final CardRepository cardRepository;
     private final BenefitConverter benefitConverter;
+    private final ProtoMapper protoMapper;
 
     // 사용자 카드 등록
     @Transactional
@@ -48,10 +50,10 @@ public class UserCardRegistrationService {
         // 응답 DTO 생성
         return CardWithBenefitResponse.builder()
                 .cardId(card.getId())
-                .cardName(card.getCardName())
-                .cardBank(card.getCardBank())
+                .cardName(card.getName())
+                .cardType(card.getCardType())
+                .cardCompany(card.getCardCompany())
                 .imgUrl(card.getImgUrl())
-                .type(card.getType())
                 .benefits(benefitConverter.convertMultipleBenefitsToDTO(card.getBenefits()))
                 .build();
     }

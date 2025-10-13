@@ -1,11 +1,11 @@
-package com.example.demo.event;
+package com.example.demo.event.CardData;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import com.example.demo.event.service.CardDataChangeDetectionService;
+import com.example.demo.event.CardData.service.CardDataChangeDetectionService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

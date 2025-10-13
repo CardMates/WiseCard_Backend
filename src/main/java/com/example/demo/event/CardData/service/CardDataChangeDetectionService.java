@@ -1,10 +1,7 @@
-package com.example.demo.event.service;
+package com.example.demo.event.CardData.service;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
-import com.example.demo.benefit.application.dto.CashbackBenefitDTO;
 import com.example.demo.benefit.application.dto.ChannelType;
 import com.example.demo.benefit.entity.CashbackBenefit;
 import com.example.demo.benefit.entity.DiscountBenefit;
@@ -12,7 +9,6 @@ import com.example.demo.benefit.entity.PointBenefit;
 import com.example.demo.benefit.util.ProtoMapper;
 import com.example.demo.card.entity.CardBenefit;
 import com.example.demo.card.repository.CardBenefitRepository;
-import com.sub.grpc.CardCompanyOuterClass;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,10 +62,19 @@ public class CardDataChangeDetectionService {
 
         for (CardData.CardBenefit cardBenefit : cardBenefitList.getCardBenefitsList()) {
             try {
+                log.info("처리 중인 카드: ID={}, 이름={}, 회사={}", 
+                    cardBenefit.getCardId(), cardBenefit.getCardName(), cardBenefit.getCardCompany());
+                
                 // 1. 카드 조회 또는 생성
                 Card card = cardRepository.findByCardId(cardBenefit.getCardId())
-                        .map(existingCard -> updateCardIfNeeded(existingCard,cardBenefit))
-                        .orElseGet(() -> createCard(cardBenefit));
+                        .map(existingCard -> {
+                            log.info("기존 카드 발견: DB ID={}, Card ID={}", existingCard.getId(), existingCard.getCardId());
+                            return updateCardIfNeeded(existingCard,cardBenefit);
+                        })
+                        .orElseGet(() -> {
+                            log.info("신규 카드 생성: Card ID={}", cardBenefit.getCardId());
+                            return createCard(cardBenefit);
+                        });
 
                 // 2. 카드-혜택 매핑 동기화
                 boolean changed = syncCardBenefits(card, cardBenefit.getBenefitsList());
@@ -86,6 +91,13 @@ public class CardDataChangeDetectionService {
         }
 
         log.info("동기화 완료 - 변경 카드: {}, 신규 카드: {}", updateCount, createCount);
+        
+        // 데이터베이스 저장 확인을 위한 추가 로그
+        if (updateCount == 0 && createCount == 0) {
+            log.warn("⚠️ 데이터베이스에 저장된 카드가 0개입니다. 입력 데이터를 확인하세요.");
+        } else {
+            log.info("✅ 데이터베이스 저장 성공 - 총 {}개 카드 처리됨", updateCount + createCount);
+        }
     }
 
     private Card updateCardIfNeeded(Card card, CardData.CardBenefit cardBenefit) {
@@ -93,14 +105,28 @@ public class CardDataChangeDetectionService {
 
         if (!cardBenefit.getCardName().equals(card.getName())){
             card = card.builder()
+                    .id(card.getId())
+                    .cardId(card.getCardId())
                     .name(cardBenefit.getCardName())
+                    .cardCompany(card.getCardCompany())
+                    .cardType(card.getCardType())
+                    .imgUrl(card.getImgUrl())
+                    .type(card.getType())
+                    .cardBenefits(card.getCardBenefits())
                     .build();
             changed = true;
         }
 
         if (!cardBenefit.getImgUrl().equals(card.getImgUrl())) {
             card = card.builder()
+                    .id(card.getId())
+                    .cardId(card.getCardId())
+                    .name(card.getName())
+                    .cardCompany(card.getCardCompany())
+                    .cardType(card.getCardType())
                     .imgUrl(cardBenefit.getImgUrl())
+                    .type(card.getType())
+                    .cardBenefits(card.getCardBenefits())
                     .build();
             changed = true;
         }
@@ -109,16 +135,30 @@ public class CardDataChangeDetectionService {
 
         if (!cardCompany.equals(card.getCardCompany())) {
             card = card.builder()
+                    .id(card.getId())
+                    .cardId(card.getCardId())
+                    .name(card.getName())
                     .cardCompany(cardCompany)
+                    .cardType(card.getCardType())
+                    .imgUrl(card.getImgUrl())
+                    .type(card.getType())
+                    .cardBenefits(card.getCardBenefits())
                     .build();
             changed = true;
         }
 
         Card.CardType cardType = protoMapper.mapToCardType(cardBenefit.getCardType());
 
-        if (!cardBenefit.getCardType().equals(card.getType())) {
+        if (!cardType.equals(card.getCardType())) {
             card = card.builder()
+                    .id(card.getId())
+                    .cardId(card.getCardId())
+                    .name(card.getName())
+                    .cardCompany(card.getCardCompany())
                     .cardType(cardType)
+                    .imgUrl(card.getImgUrl())
+                    .type(card.getType())
+                    .cardBenefits(card.getCardBenefits())
                     .build();
             changed = true;
         }
@@ -134,8 +174,8 @@ public class CardDataChangeDetectionService {
         Card.CardCompany cardCompany = protoMapper.mapToCardCompany(cardBenefit.getCardCompany());
         Card.CardType cardType = protoMapper.mapToCardType(cardBenefit.getCardType());
 
-
         Card card = Card.builder()
+                .cardId(cardBenefit.getCardId())  // cardId 추가
                 .name(cardBenefit.getCardName())
                 .cardCompany(cardCompany)
                 .cardType(cardType)

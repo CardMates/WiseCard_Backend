@@ -77,7 +77,7 @@ message CardSaveResponse {
   int32 saved_count = 3;
 }
 
-// gRPC 서비스 정의
+// API 서버 저장 서비스
 service CardDataService {
   rpc SaveCardData(CardBenefitList) returns (CardSaveResponse);
 }

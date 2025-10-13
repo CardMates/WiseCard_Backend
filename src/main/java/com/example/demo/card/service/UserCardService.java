@@ -1,7 +1,6 @@
 package com.example.demo.card.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -30,7 +29,7 @@ public class UserCardService {
                 .filter(card -> {
                     // 카드사 필터링
                     if (cardBank != null && !cardBank.trim().isEmpty()) {
-                        if (!card.getCardBank().contains(cardBank)) {
+                        if (!card.getCardCompany().name().equalsIgnoreCase(cardBank)) {
                             return false;
                         }
                     }
@@ -44,7 +43,7 @@ public class UserCardService {
                     
                     // 카드명 검색 (부분 일치, 대소문자 구분 없음)
                     if (cardName != null && !cardName.trim().isEmpty()) {
-                        if (!card.getCardName().toLowerCase().contains(cardName.toLowerCase())) {
+                        if (!card.getName().toLowerCase().contains(cardName.toLowerCase())) {
                             return false;
                         }
                     }
@@ -53,10 +52,10 @@ public class UserCardService {
                 })
                 .map(card -> CardWithBenefitResponse.builder()
                         .cardId(card.getId())
-                        .cardName(card.getCardName())
-                        .cardBank(card.getCardBank())
+                        .cardName(card.getName())
+                        .cardCompany(card.getCardCompany())
                         .imgUrl(card.getImgUrl())
-                        .type(card.getType())
+                        .cardType(card.getCardType())
                         .benefits(convertToBenefitDetailDTO(card.getBenefits()))
                         .build())
                 .toList();

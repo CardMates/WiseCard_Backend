@@ -80,11 +80,11 @@ public class OptimalBenefitService {
                 
                 return new CardWithBenefitResponse(
                     card.getId(),
-                    card.getCardName(),
-                    card.getCardBank(),
+                    card.getName(),
                     card.getImgUrl(),
-                    card.getType(),
-                    benefitConverter.convertMultipleBenefitsToDTO(cardBenefits)
+                    benefitConverter.convertMultipleBenefitsToDTO(cardBenefits),
+                    card.getCardCompany(),
+                    card.getCardType()
                 );
             })
             .collect(java.util.stream.Collectors.toList());
@@ -262,7 +262,6 @@ public class OptimalBenefitService {
         return AvailableCardResponse.builder()
                .cardId(cardResponse.cardId())
                 .cardName(cardResponse.cardName())
-                .cardBank(cardResponse.cardBank())
                 .imgUrl(cardResponse.imgUrl())
                 .benefits(cardResponse.benefits())
                 .performance(performanceInfo)
