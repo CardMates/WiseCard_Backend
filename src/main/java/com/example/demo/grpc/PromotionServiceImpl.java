@@ -26,6 +26,9 @@ public class PromotionServiceImpl extends CardPromotionServiceGrpc.CardPromotion
                     .source("crawler-server")
                     .build();
             applicationEventPublisher.publishEvent(event);
+            responseObserver.onNext(Promotion.PromotionSaveResponse.newBuilder().build());
+            responseObserver.onCompleted();
+
         }catch (Exception e){
             responseObserver.onError(e);
         }
