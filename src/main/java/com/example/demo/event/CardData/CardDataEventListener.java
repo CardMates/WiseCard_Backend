@@ -21,7 +21,7 @@ public class CardDataEventListener {
      * 카드 데이터 수신 이벤트 처리 (1순위: 데이터 변경 감지)
      */
     @EventListener
-    @Async
+//    @Async
     @Order(1)
     public void handleCardDataReceived(CardDataReceivedEvent event) {
         log.info("카드 데이터 수신 이벤트 처리 시작 - 소스: {}, 수신시간: {}", 
