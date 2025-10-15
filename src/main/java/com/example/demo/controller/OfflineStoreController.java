@@ -42,11 +42,14 @@ public class OfflineStoreController {
         }
         
         // 2. 카카오 API로 장소 검색
+        log.info("🗺️ 카카오 API 호출 - 카테고리: {}, 위치: ({}, {})");
         List<Map<String, Object>> stores = kakaoMapService.searchPlaces(request.cat(), request.lat(), request.lng());
-        
+        log.info("🏪 카카오 API 검색 결과: {} 개 매장", stores.size());
+
         // 3. 각 매장에 대해 실제 카드 혜택 매칭
         List<StoreInfoDTO> storesWithCards = storeCardMatchingService.matchStoresWithCards(stores, userCards);
-        
+        log.info("🎯 최종 매칭 결과: {} 개 매장", storesWithCards.size());
+
         return ResponseEntity.ok(new StoreSearchResponse(storesWithCards));
     }
 }

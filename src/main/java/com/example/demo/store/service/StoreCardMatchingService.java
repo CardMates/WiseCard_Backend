@@ -51,17 +51,24 @@ public class StoreCardMatchingService {
         String storeName = (String) store.get("place_name");
         String categoryCode = (String) store.get("category_group_code");
 
+        log.info("🔍 매장 매칭 시작 - 매장명: {}, 카테고리: {}", storeName, categoryCode);
+
         for (Card card : userCards) {
             List<BenefitInfoDTO> matchingBenefits = new ArrayList<>();
 
             for (Benefit benefit : card.getBenefits()) {
+                log.info("🎁 혜택 검사: {} (카테고리: {})", benefit.getSummary(), benefit.getApplicableCategory());
                 if (isBenefitApplicable(benefit, storeName, categoryCode, channelType)) {
+                    log.info("✅ 혜택 매칭됨: {}", benefit.getSummary());
                     List<BenefitInfoDTO> benefitInfos = createBenefitInfoList(benefit, channelType);
                     matchingBenefits.addAll(benefitInfos);
+                } else {
+                    log.info("❌ 혜택 매칭 안됨: {}", benefit.getSummary());
                 }
             }
 
             if (!matchingBenefits.isEmpty()) {
+                log.info("🎯 카드에 매칭된 혜택 수: {}", matchingBenefits.size());
                 CardBenefitDTO cardInfo = CardBenefitDTO.builder()
                     .cardId(card.getId())
                     .cardName(card.getName())
@@ -69,6 +76,8 @@ public class StoreCardMatchingService {
                     .build();
 
                 availableCards.add(cardInfo);
+            } else {
+                log.info("❌ 카드에 매칭된 혜택 없음: {}", card.getName());
             }
         }
 
