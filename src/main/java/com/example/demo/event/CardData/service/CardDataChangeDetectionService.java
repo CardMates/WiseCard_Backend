@@ -60,47 +60,38 @@ public class CardDataChangeDetectionService {
      */
     @Transactional
     public void processCardBenefitList(CardData.CardBenefitList cardBenefitList) {
-        int updateCount = 0;
-        int createCount = 0;
+        int processedCount = 0;
+        int failedCount = 0;
 
         for (CardData.CardBenefit cardBenefit : cardBenefitList.getCardBenefitsList()) {
             try {
                 log.info("처리 중인 카드: ID={}, 이름={}, 회사={}", 
                     cardBenefit.getCardId(), cardBenefit.getCardName(), cardBenefit.getCardCompany());
-                
-                // 1. 카드 조회 또는 생성
-                Card card = cardRepository.findByCardId(cardBenefit.getCardId())
-                        .map(existingCard -> {
-                            log.info("기존 카드 발견: DB ID={}, Card ID={}", existingCard.getId(), existingCard.getCardId());
-                            return updateCardIfNeeded(existingCard,cardBenefit);
-                        })
-                        .orElseGet(() -> {
-                            log.info("신규 카드 생성: Card ID={}", cardBenefit.getCardId());
-                            return createCard(cardBenefit);
-                        });
 
-                // 2. 카드-혜택 매핑 동기화
-                boolean changed = syncCardBenefits(card, cardBenefit.getBenefitsList());
+                // 카드 생성
+                Card card = createCard(cardBenefit);
 
-                if (changed) {
-                    updateCount++;
-                    log.info("변경된 카드 저장 완료: id={}, name={}", card.getId(), card.getName());
-                } else {
-                    createCount++;
+                for (CardData.Benefit protoBenefit : cardBenefit.getBenefitsList()) {
+                    // Benefit 엔티티 새로 생성
+                    Benefit benefit = createBenefit(protoBenefit, card);
+                    CardBenefit newCardBenefit = CardBenefit.builder()
+                            .card(card) // 기존 카드 엔티티
+                            .benefit(benefit) // 새로 생성한 Benefit 엔티티
+                            .build();
+
+                    cardBenefitRepository.save(newCardBenefit);
                 }
+                processedCount++;
+                log.info("카드 동기화 성공: 카드사 {}, 이름 {}", cardBenefit.getCardCompany(), cardBenefit.getCardName());
+
+
             } catch (Exception e) {
+                failedCount++;
                 log.error("카드 동기화 실패: 카드사 {}, 이름 {}", cardBenefit.getCardCompany(),cardBenefit.getCardName(), e);
             }
         }
+        log.info("카드 동기화 완료: 성공 {}, 실패 {}", processedCount, failedCount);
 
-        log.info("동기화 완료 - 변경 카드: {}, 신규 카드: {}", updateCount, createCount);
-        
-        // 데이터베이스 저장 확인을 위한 추가 로그
-        if (updateCount == 0 && createCount == 0) {
-            log.warn("⚠️ 데이터베이스에 저장된 카드가 0개입니다. 입력 데이터를 확인하세요.");
-        } else {
-            log.info("✅ 데이터베이스 저장 성공 - 총 {}개 카드 처리됨", updateCount + createCount);
-        }
     }
 
     private Card updateCardIfNeeded(Card card, CardData.CardBenefit cardBenefit) {
