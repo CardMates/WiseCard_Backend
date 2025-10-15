@@ -31,10 +31,6 @@ public class Benefit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "card_id")
-    private Card cardId;
-
     @ElementCollection
     @CollectionTable(name = "benefit_applicable_categories", joinColumns = @JoinColumn(name = "benefit_id"))
     @Column(name = "applicable_category")

@@ -6,6 +6,9 @@ import com.example.demo.benefit.application.dto.ChannelType;
 import com.example.demo.benefit.entity.CashbackBenefit;
 import com.example.demo.benefit.entity.DiscountBenefit;
 import com.example.demo.benefit.entity.PointBenefit;
+import com.example.demo.benefit.repository.CashbackBenefitRepository;
+import com.example.demo.benefit.repository.DiscountBenefitRepository;
+import com.example.demo.benefit.repository.PointBenefitRepository;
 import com.example.demo.benefit.util.ProtoMapper;
 import com.example.demo.card.entity.CardBenefit;
 import com.example.demo.card.repository.CardBenefitRepository;
@@ -30,21 +33,21 @@ public class CardDataChangeDetectionService {
     private final BenefitRepository benefitRepository;
     private final CardRepository cardRepository;
     private final ProtoMapper protoMapper;
+    private final DiscountBenefitRepository discountBenefitRepository;
+    private final PointBenefitRepository pointBenefitRepository;
+    private final CashbackBenefitRepository cashbackBenefitRepository;
 
     /**
      * 크롤링된 카드 데이터 처리 및 변경 감지
      */
     @Transactional
-    public void processCardDataChanges(Object crawledData) {
+    public void processCardDataChanges(CardData.CardBenefitList crawledData) {
         log.info("크롤링된 카드 데이터 처리 시작");
         
         try {
             // gRPC 데이터 타입 확인 및 처리
-            if (crawledData instanceof CardData.CardBenefitList) {
-                processCardBenefitList((CardData.CardBenefitList) crawledData);
-            } else {
-                log.warn("지원하지 않는 데이터 타입: {}", crawledData.getClass().getSimpleName());
-            }
+            processCardBenefitList(crawledData);
+
         } catch (Exception e) {
             log.error("크롤링된 카드 데이터 처리 중 오류 발생", e);
         }
@@ -234,7 +237,7 @@ public class CardDataChangeDetectionService {
                     .benefitLimit(proto.getBenefitLimit())
                     .channel(ChannelType.valueOf(proto.getChannel().name()))
                     .build();
-            benefit.getDiscountBenefits().add(discountBenefit);
+            discountBenefitRepository.save(discountBenefit);
         }
     }
     private void createPointBenefits(Benefit benefit, List<CardData.PointBenefit> protoPoints){
@@ -246,7 +249,7 @@ public class CardDataChangeDetectionService {
                     .benefitLimit(proto.getBenefitLimit())
                     .channel(ChannelType.valueOf(proto.getChannel().name()))
                     .build();
-            benefit.getPointBenefits().add(pointBenefit);
+            pointBenefitRepository.save(pointBenefit);
         }
     }
     private void createCashbackBenefits(Benefit benefit, List<CardData.CashbackBenefit> protoCashbacks){
@@ -259,7 +262,7 @@ public class CardDataChangeDetectionService {
                     .benefitLimit(proto.getBenefitLimit())
                     .channel(ChannelType.valueOf(proto.getChannel().name()))
                     .build();
-            benefit.getCashbackBenefits().add(cashbackBenefit);
+            cashbackBenefitRepository.save(cashbackBenefit);
         }
     }
 }
