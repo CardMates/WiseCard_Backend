@@ -31,10 +31,10 @@ public class KakaoMapService {
         try {
             URI uri = UriComponentsBuilder.fromUriString(KAKAO_API_BASE_URL)
                     .queryParam("query", "매장")
-                    .queryParam("category_group_code", categoryCode)
+//                    .queryParam("category_group_code", categoryCode)
                     .queryParam("x", longitude)
                     .queryParam("y", latitude)
-                    .queryParam("radius", 2000)
+                    .queryParam("radius", 5000)
                     .queryParam("page", 1)
                     .queryParam("size", 15)
                     .build()
