@@ -30,6 +30,7 @@ public class KakaoMapService {
     public List<Map<String, Object>> searchPlaces(String categoryCode, Double latitude, Double longitude) {
         try {
             URI uri = UriComponentsBuilder.fromUriString(KAKAO_API_BASE_URL)
+                    .queryParam("query", "매장")
                     .queryParam("category_group_code", categoryCode)
                     .queryParam("x", longitude)
                     .queryParam("y", latitude)
