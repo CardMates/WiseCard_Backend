@@ -9,11 +9,13 @@ import com.example.demo.promotion.repository.PromotionRepository;
 import com.sub.grpc.Promotion;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PromotionEventService {
 
     private final ProtoMapper protoMapper;
@@ -26,14 +28,18 @@ public class PromotionEventService {
 
         int totalReceived = event.getCardPromotionList().getCardPromotionCount();
         int processedCount = 0;
+        int failedCount = 0;
 
-        try{
-            for (Promotion.CardPromotion promotion : event.getCardPromotionList().getCardPromotionList()) {
+        for (Promotion.CardPromotion promotion : event.getCardPromotionList().getCardPromotionList()){
+            try{
                 processPromotion(promotion);
+                processedCount++;
+            }catch (Exception e){
+                log.error("프로모션 처리 실패: {}", promotion.getDescription(), e);
+                failedCount++;
             }
-        } catch (Exception e) {
-
         }
+        log.info("프로모션 처리 완료 - 성공: {}, 실패: {}", processedCount, failedCount);
         PromotionProcessedEvent response = createPromotionProcessedEvent(totalReceived, processedCount);
         applicationEventPublisher.publishEvent(response);
 
@@ -43,16 +49,22 @@ public class PromotionEventService {
     // 개별 프로모션 생성
     private void processPromotion(Promotion.CardPromotion protoPromotion) {
 
-        Card.CardCompany cardCompany = protoMapper.mapToCardCompany(protoPromotion.getCardCompany());
+        try {
+            Card.CardCompany cardCompany = protoMapper.mapToCardCompany(protoPromotion.getCardCompany());
 
-        CardPromotion promotion = CardPromotion.builder()
-                .cardCompany(cardCompany)
-                .description(protoPromotion.getDescription())
-                .imgUrl(protoPromotion.getImgUrl())
-                .url(protoPromotion.getUrl())
-                .build();
+            CardPromotion promotion = CardPromotion.builder()
+                    .cardCompany(cardCompany)
+                    .description(protoPromotion.getDescription())
+                    .imgUrl(protoPromotion.getImgUrl())
+                    .url(protoPromotion.getUrl())
+                    .build();
 
-        promotionRepository.save(promotion);
+            promotionRepository.save(promotion);
+            log.info("프로모션 저장 완료: {}", promotion.getDescription());
+        } catch (Exception e) {
+            log.error("프로모션 저장 실패: {}", protoPromotion.getDescription(), e);
+            throw e;
+        }
     }
 
 
