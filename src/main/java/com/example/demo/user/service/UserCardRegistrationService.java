@@ -15,6 +15,8 @@ import com.example.demo.user.repository.UserCardRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -42,6 +44,7 @@ public class UserCardRegistrationService {
                 .userId(userId)
                 .card(card)
                 .isActive(true)
+                .registeredAt(LocalDateTime.now())
                 .build();
 
         // 저장
