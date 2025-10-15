@@ -8,6 +8,7 @@ public record CashbackBenefitDTO(
         double amount,
         long minimumAmount,
         long benefitLimit, 
-        ChannelType channel
+        ChannelType channel,
+        Integer minimumSpending
 ) {
 }

@@ -66,8 +66,8 @@ public class OptimalBenefitService {
         
         // 3. 보유 카드 중에서만 매칭되는 카드 반환 (카드별로 모든 Benefit 합치기)
         Map<Long, List<Benefit>> benefitsByCard = applicableBenefits.stream()
-            .filter(benefit -> userCardIds.contains(benefit.getCardId().getId()))
-            .collect(Collectors.groupingBy(benefit -> benefit.getCardId().getId()));
+            .filter(benefit -> userCardIds.contains(benefit.getCard().getId()))
+            .collect(Collectors.groupingBy(benefit -> benefit.getCard().getId()));
         
         List<CardWithBenefitResponse> matchingCards = benefitsByCard.entrySet().stream()
             .map(entry -> {
@@ -80,11 +80,11 @@ public class OptimalBenefitService {
                 
                 return new CardWithBenefitResponse(
                     card.getId(),
-                    card.getCardName(),
-                    card.getCardBank(),
+                    card.getName(),
                     card.getImgUrl(),
-                    card.getType(),
-                    benefitConverter.convertMultipleBenefitsToDTO(cardBenefits)
+                    benefitConverter.convertMultipleBenefitsToDTO(cardBenefits),
+                    card.getCardCompany(),
+                    card.getCardType()
                 );
             })
             .collect(java.util.stream.Collectors.toList());
@@ -262,7 +262,6 @@ public class OptimalBenefitService {
         return AvailableCardResponse.builder()
                .cardId(cardResponse.cardId())
                 .cardName(cardResponse.cardName())
-                .cardBank(cardResponse.cardBank())
                 .imgUrl(cardResponse.imgUrl())
                 .benefits(cardResponse.benefits())
                 .performance(performanceInfo)

@@ -20,10 +20,10 @@ public class BenefitConverter {
      */
     public BenefitDetailDTO convertMultipleBenefitsToDTO(List<Benefit> benefits) {
         if (benefits == null || benefits.isEmpty()) {
-            return new BenefitDetailDTO(List.of(), List.of(), List.of(), List.of(), List.of());
+            return new BenefitDetailDTO(List.of(), List.of(), List.of(), List.of(), List.of(), null);
         }
 
-        // 모든 Benefit의 정보를 합쳐서 하나의 BenefitDetailDTO로 변환
+        // 모든 Benefit의 정보를 합쳐서 하나의 BenefitDetailDTO로 변환 -> 실적 만족 여부는?
         List<DiscountBenefitDTO> allDiscounts = benefits.stream()
                 .flatMap(benefit -> benefit.getDiscountBenefits().stream())
                 .map(discount -> DiscountBenefitDTO.builder()
@@ -65,7 +65,13 @@ public class BenefitConverter {
                 .distinct()
                 .collect(Collectors.toList());
 
-        return new BenefitDetailDTO(allDiscounts, allPoints, allCashbacks, allApplicableCategories, allApplicableTargets);
+        String allSummaries = benefits.stream()
+                .map(Benefit::getSummary)
+                .filter(summary -> summary !=null && !summary.trim().isEmpty())
+                .distinct()
+                .collect(Collectors.joining(", "));
+
+        return new BenefitDetailDTO(allDiscounts, allPoints, allCashbacks, allApplicableCategories, allApplicableTargets, allSummaries);
     }
 
 

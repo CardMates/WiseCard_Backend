@@ -128,8 +128,7 @@ public class OnlineStoreService {
                 .filter(card -> hasBenefitForStore(card, storeId))
                 .map(card -> AvailableCardResponse.builder()
                         .cardId(card.getId())
-                        .cardName(card.getCardName())
-                        .cardBank(card.getCardBank())
+                        .cardName(card.getName())
                         .imgUrl(card.getImgUrl())
                         .type(card.getType())
                         .benefits(convertBenefitsToDTO(card.getBenefits()))
@@ -156,6 +155,7 @@ public class OnlineStoreService {
         List<CashbackBenefitDTO> cashbacks = new ArrayList<>();
         List<String> applicableCategory = new ArrayList<>();
         List<String> applicableTargets = new ArrayList<>();
+        String summary = new String();
         
         for (Benefit benefit : benefits) {
             // 할인 혜택
@@ -193,9 +193,10 @@ public class OnlineStoreService {
             // 적용 카테고리 및 대상
             applicableCategory.addAll(benefit.getApplicableCategory());
             applicableTargets.addAll(benefit.getApplicableTargets());
+            summary = benefit.getSummary();
         }
         
-        return new BenefitDetailDTO(discounts, points, cashbacks, applicableCategory, applicableTargets);
+        return new BenefitDetailDTO(discounts, points, cashbacks, applicableCategory, applicableTargets, summary);
     }
 
 }

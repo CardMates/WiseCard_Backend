@@ -8,6 +8,7 @@ public record DiscountBenefitDTO(
         double amount,
         double minimumAmount,
         double benefitLimit,
-        ChannelType channel
+        ChannelType channel,
+        Integer minimumSpending
 ) {
 }

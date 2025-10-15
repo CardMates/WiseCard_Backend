@@ -31,21 +31,21 @@ public class GetCardService {
                 .filter(card -> {
                     // 카드사 필터링
                     if (cardBank != null && !cardBank.trim().isEmpty()) {
-                        if (!card.getCardBank().contains(cardBank)) {
+                        if (!card.getCardCompany().name().toLowerCase().contains(cardBank.toLowerCase())) {
                             return false;
                         }
                     }
                     
                     // 카드 타입 필터링
                     if (cardType != null && !cardType.trim().isEmpty()) {
-                        if (!card.getType().equalsIgnoreCase(cardType)) {
+                        if (!card.getCardType().name().toLowerCase().contains(cardType.toLowerCase())) {
                             return false;
                         }
                     }
                     
                     // 카드명 검색 (부분 일치, 대소문자 구분 없음)
                     if (cardName != null && !cardName.trim().isEmpty()) {
-                        if (!card.getCardName().toLowerCase().contains(cardName.toLowerCase())) {
+                        if (!card.getName().toLowerCase().contains(cardName.toLowerCase())) {
                             return false;
                         }
                     }
@@ -54,10 +54,10 @@ public class GetCardService {
                 })
                 .map(card -> CardWithBenefitResponse.builder()
                         .cardId(card.getId())
-                        .cardName(card.getCardName())
-                        .cardBank(card.getCardBank())
+                        .cardName(card.getName())
+                        .cardCompany(card.getCardCompany())
                         .imgUrl(card.getImgUrl())
-                        .type(card.getType())
+                        .cardType(card.getCardType())
                         .benefits(convertToBenefitDetailDTO(card.getBenefits()))
                         .build())
                 .collect(Collectors.toList());

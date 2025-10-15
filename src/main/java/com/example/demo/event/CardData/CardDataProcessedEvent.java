@@ -1,4 +1,4 @@
-package com.example.demo.event;
+package com.example.demo.event.CardData;
 
 import lombok.Builder;
 import lombok.Getter;

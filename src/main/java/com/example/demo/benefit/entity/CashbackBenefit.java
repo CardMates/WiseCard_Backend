@@ -18,7 +18,6 @@ import lombok.Setter;
 @Entity
 @NoArgsConstructor
 @Getter
-@Setter
 public class CashbackBenefit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,17 +34,17 @@ public class CashbackBenefit {
     @JoinColumn(name = "benefit_id")
     private Benefit benefit;
 
-    private Long externalId;
+    private Integer minimumSpending;
 
     @Builder
-    public CashbackBenefit(double rate, double amount, long minimumAmount, long benefitLimit, ChannelType channel, Benefit benefit, Long externalId) {
+    public CashbackBenefit(double rate, double amount, long minimumAmount, long benefitLimit, ChannelType channel, Benefit benefit, Integer minimumSpending) {
         this.rate = rate;
         this.amount = amount;
         this.minimumAmount = minimumAmount;
         this.benefitLimit = benefitLimit;
         this.channel = channel;
         this.benefit = benefit;
-        this.externalId = externalId;
+        this.minimumSpending = minimumSpending;
     }
 
 }

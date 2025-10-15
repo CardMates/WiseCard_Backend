@@ -1,8 +1,8 @@
 grpc:
   client:
-    local-grpc-server: # ????? ??
-      address: "static://localhost:9090" # ?? ??(??? ??? ?? ??IP)
+    local-grpc-server:
+      address: "static://localhost:9090"
       negotiationType: "plaintext"
 
 server:
-  port: 50051
+  port: 9092

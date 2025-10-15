@@ -1,11 +1,11 @@
-package com.example.demo.event;
+package com.example.demo.event.CardData;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import com.example.demo.event.service.CardDataChangeDetectionService;
+import com.example.demo.event.CardData.service.CardDataChangeDetectionService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ public class CardDataEventListener {
      * 카드 데이터 수신 이벤트 처리 (1순위: 데이터 변경 감지)
      */
     @EventListener
-    @Async
+//    @Async
     @Order(1)
     public void handleCardDataReceived(CardDataReceivedEvent event) {
         log.info("카드 데이터 수신 이벤트 처리 시작 - 소스: {}, 수신시간: {}", 
@@ -29,7 +29,7 @@ public class CardDataEventListener {
         
         try {
             // 실제 데이터 변경 감지 및 처리
-            changeDetectionService.processCardDataChanges(event.getCrawledData());
+            changeDetectionService.processCardBenefitList(event.getCardBenefitList());
             
             log.info("카드 데이터 변경 감지 및 처리 완료 - 소스: {}", event.getSource());
             

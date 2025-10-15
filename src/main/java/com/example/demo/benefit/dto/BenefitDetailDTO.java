@@ -11,5 +11,6 @@ public record BenefitDetailDTO(
     List<PointBenefitDTO> points,
     List<CashbackBenefitDTO> cashbacks,
     List<String> applicableCategory,
-    List<String> applicableTargets
+    List<String> applicableTargets,
+    String summary
 ) {}

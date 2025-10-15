@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package com.sub.grpc;
+
+enum CardCompany {
+  HANA = 0;
+  HYUNDAI = 1;
+  KOOKMIN = 2;
+  LOTTE = 3;
+  SAMSUNG = 4;
+  SHINHAN = 5;
+}

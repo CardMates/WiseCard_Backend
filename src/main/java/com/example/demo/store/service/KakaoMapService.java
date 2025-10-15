@@ -25,15 +25,16 @@ public class KakaoMapService {
     private final RestTemplate restTemplate;
     private final ApiKeyConfig apiKeyConfig;
 
-    private static final String KAKAO_API_BASE_URL = "https://dapi.kakao.com/v2/local/search/keyword.json";
+    private static final String KAKAO_API_BASE_URL = "https://dapi.kakao.com/v2/local/search/category.json";
 
     public List<Map<String, Object>> searchPlaces(String categoryCode, Double latitude, Double longitude) {
         try {
             URI uri = UriComponentsBuilder.fromUriString(KAKAO_API_BASE_URL)
+//                    .queryParam("query", "")
                     .queryParam("category_group_code", categoryCode)
                     .queryParam("x", longitude)
                     .queryParam("y", latitude)
-                    .queryParam("radius", 2000)
+                    .queryParam("radius", 5000)
                     .queryParam("page", 1)
                     .queryParam("size", 15)
                     .build()
