@@ -200,7 +200,7 @@ public class CardDataChangeDetectionService {
 
         for (CardData.Benefit protoBenefit : benefitList) {
             // Benefit 엔티티 새로 생성
-            Benefit benefit = createBenefit(protoBenefit);
+            Benefit benefit = createBenefit(protoBenefit, card);
             CardBenefit newCardBenefit = CardBenefit.builder()
                     .card(card) // 기존 카드 엔티티
                     .benefit(benefit) // 새로 생성한 Benefit 엔티티
@@ -213,11 +213,12 @@ public class CardDataChangeDetectionService {
     }
 
 
-    private Benefit createBenefit(CardData.Benefit protoBenefit) {
+    private Benefit createBenefit(CardData.Benefit protoBenefit, Card card) {
         Benefit benefit = Benefit.builder()
                 .summary(protoBenefit.getSummary())
                 .applicableCategory(new ArrayList<>(protoBenefit.getCategoriesList()))
                 .applicableTargets(new ArrayList<>(protoBenefit.getTargetsList()))
+                .card(card)
                 .build();
         Benefit savedBenefit = benefitRepository.save(benefit);
 

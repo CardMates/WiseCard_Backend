@@ -31,6 +31,10 @@ public class Benefit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "card_id")
+    private Card card;
+
     @ElementCollection
     @CollectionTable(name = "benefit_applicable_categories", joinColumns = @JoinColumn(name = "benefit_id"))
     @Column(name = "applicable_category")
@@ -53,10 +57,11 @@ public class Benefit {
     private String summary;
 
     @Builder
-    public Benefit(List<String> applicableCategory, List<String> applicableTargets, String summary) {
+    public Benefit(List<String> applicableCategory, List<String> applicableTargets, String summary, Card card) {
         this.applicableCategory = applicableCategory;
         this.applicableTargets = applicableTargets;
         this.summary = summary;
+        this.card = card;
     }
 
 }
