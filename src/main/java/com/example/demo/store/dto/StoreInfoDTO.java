@@ -9,6 +9,6 @@ public record StoreInfoDTO(
     String id,
     String placeName,
     List<CardBenefitDTO> availableCards,
-    Integer lat,
-    Integer lng
+    Double lat,
+    Double lng
 ) {}

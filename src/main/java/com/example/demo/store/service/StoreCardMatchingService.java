@@ -37,6 +37,8 @@ public class StoreCardMatchingService {
                     .id((String) store.get("id"))
                     .placeName((String) store.get("place_name"))
                     .availableCards(availableCards)
+                        .lat((Double) store.get("y"))
+                        .lng((Double) store.get("x"))
                     .build();
                 storesWithCards.add(storeInfo);
             }
