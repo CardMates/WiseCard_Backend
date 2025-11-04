@@ -8,6 +8,7 @@ import com.example.demo.auth.dto.TokenResponse;
 import com.example.demo.auth.entity.Member;
 import com.example.demo.auth.jwt.JwtTokenProvider;
 import com.example.demo.auth.repository.MemberRepository;
+import com.example.demo.auth.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,35 +24,19 @@ public class KakaoLoginService {
     private final KakaoOAuthClient kakaoOAuthClient;
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenService refreshTokenService;
-
-    @Transactional
-    public TokenResponse signup(AccessTokenRequest request) {
-        KakaoUserInfo kakaoUserInfo = kakaoOAuthClient.retrieveUserInfo(request.accessToken());
-
-        if (memberRepository.findBySocialId(kakaoUserInfo.getId()).isPresent()) {
-            throw new RuntimeException("이미 가입된 사용자입니다.");
-        }
-
-        Member member = Member.builder()
-                .socialId(kakaoUserInfo.getId())
-                .name(kakaoUserInfo.getNickName())
-                .email(kakaoUserInfo.getEmail())
-                .build();
-
-        Member newMember = memberRepository.save(member);
-
-        String accessToken = jwtTokenProvider.createAccessToken(newMember.getId());
-        String refreshToken = jwtTokenProvider.createRefreshToken(newMember.getId());
-
-        refreshTokenService.save(newMember.getId(), refreshToken);
-
-        return new TokenResponse(accessToken, refreshToken);
-    }
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Transactional
     public TokenResponse login(AccessTokenRequest request) {
         KakaoUserInfo kakaoUserInfo = kakaoOAuthClient.retrieveUserInfo(request.accessToken());
-        Member member = memberRepository.findBySocialId(kakaoUserInfo.getId()).orElseThrow();
+        Member member = memberRepository.findBySocialId(kakaoUserInfo.getId()).orElseGet(()-> {
+            Member newMember = Member.builder()
+                    .socialId(kakaoUserInfo.getId())
+                    .name(kakaoUserInfo.getNickName())
+                    .email(kakaoUserInfo.getEmail())
+                    .build();
+            return memberRepository.save(newMember);
+        });
 
         String accessToken = jwtTokenProvider.createAccessToken(member.getId());
         String refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
@@ -70,6 +55,7 @@ public class KakaoLoginService {
     @Transactional
     public void withdraw() {
         Long memberId = getMemberId();
+        refreshTokenRepository.deleteByMemberId(memberId);
         memberRepository.deleteById(memberId);
     }
 }
