@@ -1,5 +1,6 @@
 package com.example.demo.expense.service;
 
+import com.example.demo.auth.util.AuthUtils;
 import com.example.demo.expense.dto.PushNotificationRequest;
 import com.example.demo.expense.entity.Expense;
 import com.example.demo.expense.repository.ExpenseRepository;
@@ -57,8 +58,7 @@ public class ExpenseService {
         
         // 소비내역 엔티티 생성
         Expense expense = Expense.builder()
-                // TODO: accessToken으로 식별한 유저ID 가져올 것
-                .userId(1L) // 고정 사용자 ID
+                .userId(AuthUtils.getMemberId()) // 고정 사용자 ID
                 .place(parsedData.getPlace())
                 .amount(parsedData.getAmount())
                 .originalText(parsedData.getOriginalText())

@@ -60,6 +60,8 @@ public class CardDataChangeDetectionService {
      */
     @Transactional
     public void processCardBenefitList(CardData.CardBenefitList cardBenefitList) {
+
+
         int processedCount = 0;
         int failedCount = 0;
 
@@ -226,7 +228,7 @@ public class CardDataChangeDetectionService {
                     .rate(proto.getRate())
                     .amount(proto.getAmount())
                     .minimumAmount(proto.getMinimumAmount())
-                    .benefitLimit(proto.getBenefitLimit())
+                    .benefitLimit((long) proto.getBenefitLimit())
                     .channel(ChannelType.valueOf(proto.getChannel().name()))
                     .build();
             discountBenefitRepository.save(discountBenefit);
@@ -238,7 +240,7 @@ public class CardDataChangeDetectionService {
                     .benefit(benefit)
                     .rate(proto.getRate())
                     .minimumAmount(proto.getMinimumAmount())
-                    .benefitLimit(proto.getBenefitLimit())
+                    .benefitLimit((long) proto.getBenefitLimit())
                     .channel(ChannelType.valueOf(proto.getChannel().name()))
                     .build();
             pointBenefitRepository.save(pointBenefit);
@@ -251,7 +253,7 @@ public class CardDataChangeDetectionService {
                     .rate(proto.getRate())
                     .amount(proto.getAmount())
                     .minimumAmount(proto.getMinimumAmount())
-                    .benefitLimit(proto.getBenefitLimit())
+                    .benefitLimit((long) proto.getBenefitLimit())
                     .channel(ChannelType.valueOf(proto.getChannel().name()))
                     .build();
             cashbackBenefitRepository.save(cashbackBenefit);

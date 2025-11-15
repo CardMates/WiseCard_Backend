@@ -1,7 +1,12 @@
 package com.example.demo.card.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import com.example.demo.benefit.dto.BenefitResponse;
+import com.example.demo.benefit.entity.CashbackBenefit;
+import com.example.demo.benefit.entity.DiscountBenefit;
+import com.example.demo.benefit.entity.PointBenefit;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.benefit.dto.BenefitDetailDTO;
@@ -56,12 +61,49 @@ public class UserCardService {
                         .cardCompany(card.getCardCompany())
                         .imgUrl(card.getImgUrl())
                         .cardType(card.getCardType())
-                        .benefits(convertToBenefitDetailDTO(card.getBenefits()))
+                        .benefits(convertBenefitsToResponseDTOs(card.getBenefits()))
                         .build())
                 .toList();
     }
 
-    private BenefitDetailDTO convertToBenefitDetailDTO(List<Benefit> benefits) {
-        return benefitConverter.convertMultipleBenefitsToDTO(benefits);
+    private List<BenefitResponse> convertBenefitsToResponseDTOs(List<Benefit> benefits) {
+        List<BenefitResponse> benefitResponses = new ArrayList<>();
+
+        for(Benefit benefit : benefits){
+            for (DiscountBenefit db : benefit.getDiscountBenefits()){
+                benefitResponses.add(createBenefitResponse(benefit, db, "DISCOUNT"));
+            }
+            for (PointBenefit pb : benefit.getPointBenefits()){
+                benefitResponses.add(createBenefitResponse(benefit, pb, "POINT"));
+            }
+            for (CashbackBenefit cb : benefit.getCashbackBenefits()){
+                benefitResponses.add(createBenefitResponse(benefit, cb, "CASHBACK"));
+            }
+        }
+        return benefitResponses;
+    }
+
+    private BenefitResponse createBenefitResponse(Benefit parent, Object child, String type) {
+        BenefitResponse.BenefitResponseBuilder builder = BenefitResponse.builder()
+                .benefitId(parent.getId())
+                .benefitType(type)
+                .summary(parent.getSummary());
+
+        if (child instanceof DiscountBenefit db) {
+            builder.minimumSpending(db.getMinimumSpending())
+                    .benefitLimit(db.getBenefitLimit())
+                    .rate(db.getRate())
+                    .amount(db.getAmount());
+        } else if (child instanceof PointBenefit pb) {
+            builder.minimumSpending(pb.getMinimumSpending())
+                    .benefitLimit(pb.getBenefitLimit())
+                    .rate(pb.getRate());
+        } else if (child instanceof CashbackBenefit cb) {
+            builder.minimumSpending(cb.getMinimumSpending())
+                    .benefitLimit( cb.getBenefitLimit())
+                    .rate(cb.getRate())
+                    .amount(cb.getAmount());
+        }
+        return builder.build();
     }
 }

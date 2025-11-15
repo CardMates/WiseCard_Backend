@@ -1,21 +1,27 @@
 package com.example.demo.user.service;
 
+import com.example.demo.benefit.dto.AvailableCardResponse;
+import com.example.demo.benefit.dto.BenefitResponse;
+import com.example.demo.benefit.entity.Benefit;
+import com.example.demo.benefit.entity.CashbackBenefit;
+import com.example.demo.benefit.entity.DiscountBenefit;
+import com.example.demo.benefit.entity.PointBenefit;
 import com.example.demo.benefit.util.ProtoMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.benefit.dto.CardWithBenefitResponse;
-import com.example.demo.benefit.util.BenefitConverter;
 import com.example.demo.card.entity.Card;
 import com.example.demo.card.repository.CardRepository;
-import com.example.demo.user.dto.UserCardRegistrationRequest;
 import com.example.demo.user.entity.UserCard;
 import com.example.demo.user.repository.UserCardRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -23,12 +29,11 @@ import java.time.LocalDateTime;
 public class UserCardRegistrationService {
     private final UserCardRepository userCardRepository;
     private final CardRepository cardRepository;
-    private final BenefitConverter benefitConverter;
     private final ProtoMapper protoMapper;
 
     // 사용자 카드 등록
     @Transactional
-    public CardWithBenefitResponse registerCardToUser(Long userId, Long cardId) {
+    public AvailableCardResponse registerCardToUser(Long userId, Long cardId) {
 
         // 카드 존재 확인
         Card card = cardRepository.findById(cardId)
@@ -50,14 +55,16 @@ public class UserCardRegistrationService {
         // 저장
         userCardRepository.save(userCard);
 
+        List<BenefitResponse> benefitResponses = convertBenefitsToResponseDTOs(card.getBenefits());
+
         // 응답 DTO 생성
-        return CardWithBenefitResponse.builder()
+        return AvailableCardResponse.builder()
                 .cardId(card.getId())
                 .cardName(card.getName())
-                .cardType(card.getCardType())
+                .cardType(Card.CardType.valueOf(card.getType()))
                 .cardCompany(card.getCardCompany())
                 .imgUrl(card.getImgUrl())
-                .benefits(benefitConverter.convertMultipleBenefitsToDTO(card.getBenefits()))
+                .benefits(benefitResponses)
                 .build();
     }
 
@@ -73,5 +80,46 @@ public class UserCardRegistrationService {
         userCardRepository.save(userCard);
         
         log.info("사용자 카드 등록 해제 완료 - 사용자: {}, 카드: {}", userId, cardId);
+    }
+
+    private List<BenefitResponse> convertBenefitsToResponseDTOs(List<Benefit> benefits) {
+        List<BenefitResponse> benefitResponses = new ArrayList<>();
+
+        for(Benefit benefit : benefits){
+            for (DiscountBenefit db : benefit.getDiscountBenefits()){
+                benefitResponses.add(createBenefitResponse(benefit, db, "DISCOUNT"));
+            }
+            for (PointBenefit pb : benefit.getPointBenefits()){
+                benefitResponses.add(createBenefitResponse(benefit, pb, "POINT"));
+            }
+            for (CashbackBenefit cb : benefit.getCashbackBenefits()){
+                benefitResponses.add(createBenefitResponse(benefit, cb, "CASHBACK"));
+            }
+        }
+        return benefitResponses;
+    }
+
+    private BenefitResponse createBenefitResponse(Benefit parent, Object child, String type) {
+        BenefitResponse.BenefitResponseBuilder builder = BenefitResponse.builder()
+                .benefitId(parent.getId())
+                .benefitType(type)
+                .summary(parent.getSummary());
+
+        if (child instanceof DiscountBenefit db) {
+            builder.minimumSpending(db.getMinimumSpending())
+                    .benefitLimit(db.getBenefitLimit())
+                    .rate(db.getRate())
+                    .amount(db.getAmount());
+        } else if (child instanceof PointBenefit pb) {
+            builder.minimumSpending(pb.getMinimumSpending())
+                    .benefitLimit(pb.getBenefitLimit())
+                    .rate(pb.getRate());
+        } else if (child instanceof CashbackBenefit cb) {
+            builder.minimumSpending(cb.getMinimumSpending())
+                    .benefitLimit( cb.getBenefitLimit())
+                    .rate(cb.getRate())
+                    .amount(cb.getAmount());
+        }
+        return builder.build();
     }
 }

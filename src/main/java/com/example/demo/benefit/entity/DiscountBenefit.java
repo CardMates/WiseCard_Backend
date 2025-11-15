@@ -28,7 +28,7 @@ public class DiscountBenefit {
     private double rate;
     private double amount;
     private double minimumAmount;
-    private double benefitLimit;
+    private Long benefitLimit;
     private Integer minimumSpending;
     
     @Enumerated(EnumType.STRING)
@@ -39,7 +39,7 @@ public class DiscountBenefit {
     private Benefit benefit;
 
     @Builder
-    public DiscountBenefit(Long id, double rate, double amount, double minimumAmount, double benefitLimit, ChannelType channel, Benefit benefit, Integer minimumSpending) {
+    public DiscountBenefit(Long id, double rate, double amount, double minimumAmount, Long benefitLimit, ChannelType channel, Benefit benefit, Integer minimumSpending) {
         this.id = id;
         this.rate = rate;
         this.amount = amount;

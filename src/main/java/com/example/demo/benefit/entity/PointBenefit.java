@@ -14,6 +14,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.java.Log;
 
 
 @Entity
@@ -26,7 +27,7 @@ public class PointBenefit {
     private Long id;
     private double rate;
     private long minimumAmount;
-    private long benefitLimit;
+    private Long benefitLimit;
     
     @Enumerated(EnumType.STRING)
     private ChannelType channel;
@@ -39,7 +40,7 @@ public class PointBenefit {
     private String name;
 
     @Builder
-    public PointBenefit(double rate, long minimumAmount, long benefitLimit, ChannelType channel, Benefit benefit, Integer minimumSpending, String name) {
+    public PointBenefit(double rate, long minimumAmount, Long benefitLimit, ChannelType channel, Benefit benefit, Integer minimumSpending, String name) {
         this.rate = rate;
         this.minimumAmount = minimumAmount;
         this.benefitLimit = benefitLimit;

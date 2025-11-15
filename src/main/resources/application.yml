@@ -2,18 +2,18 @@ spring:
   application:
     name: demo
 
-#  datasource:
-#    url: jdbc:h2:mem:testdb
-#    driverClassName: org.h2.Driver
-#    username: sa
-#    password:
-
-
   datasource:
-    url: jdbc:mysql://db-wisecard.cn8uymykiw76.ap-northeast-2.rds.amazonaws.com:3306/wisecarddb
-    username: ${DB_USERNAME:admin}
-    password: ${DB_PASSWORD:wisecard}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+
+
+#  datasource:
+#    url: jdbc:mysql://db-wisecard.cn8uymykiw76.ap-northeast-2.rds.amazonaws.com:3306/wisecarddb
+#    username: ${DB_USERNAME:admin}
+#    password: ${DB_PASSWORD:wisecard}
+#    driver-class-name: com.mysql.cj.jdbc.Driver
 
 
   h2:
@@ -56,3 +56,9 @@ jwt:
   secret: ${JWT_SECRET:F0yB5JUd9/gAE2egZg09KmpnZA0KVFhMtxqiMIcYLu4nDOhR9K2zNhJoz0tKU6E3qOlQkc752ycdFee76i33gg==}
   access-token-expiration-time: 1209600000 # 14 day = 14 * 1000 * 60 * 60 * 24
   refresh-token-expiration-time: 15552000000 # 180day
+
+logging:
+  level:
+    # Tomcat HTTP ?? ?? ??? DEBUG ??? ???? INFO ?? ??? ??
+    org.apache.coyote.http11.Http11Processor: DEBUG
+    org.apache.coyote.http11.Http11InputBuffer: DEBUG

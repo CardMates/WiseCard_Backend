@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import java.util.List;
 
 import com.example.demo.auth.util.AuthUtils;
+import com.example.demo.benefit.dto.AvailableCardResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,23 +35,23 @@ public class CardController {
 
    // 카드 리스트 조회 (필터링)
     @GetMapping
-    public ResponseEntity<List<CardWithBenefitResponse>> getCards(
+    public ResponseEntity<List<AvailableCardResponse>> getCards(
             @RequestParam(required = false) String cardBank,
             @RequestParam(required = false) String cardType,
             @RequestParam(required = false) String cardName) {
         
-        List<CardWithBenefitResponse> cards = getCardService.getCards(cardBank, cardType, cardName);
+        List<AvailableCardResponse> cards = getCardService.getCards(cardBank, cardType, cardName);
         return ResponseEntity.ok(cards);
     }
 
     // 사용자 카드 등록 
     @PostMapping("/register")
-    public ResponseEntity<CardWithBenefitResponse> registerCardToUser(@RequestParam Long cardId) {
+    public ResponseEntity<AvailableCardResponse> registerCardToUser(@RequestParam Long cardId) {
 
-        Long userId = AuthUtils.getMemberId();
+        Long userId = AuthUtils.getMemberId();;
 
         try {
-            CardWithBenefitResponse registeredCard = userCardRegistrationService.registerCardToUser(userId, cardId);
+            AvailableCardResponse registeredCard = userCardRegistrationService.registerCardToUser(userId, cardId);
             return ResponseEntity.status(HttpStatus.CREATED).body(registeredCard);
             
         } catch (RuntimeException e) {

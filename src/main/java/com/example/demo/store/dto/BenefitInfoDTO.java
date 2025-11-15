@@ -7,5 +7,8 @@ public record BenefitInfoDTO(
     Long benefitId,
     String benefitType,
     Double rate,
-    Double amount
+    Double amount,
+
+    String summary,
+    Long remainingLimit
 ) {}

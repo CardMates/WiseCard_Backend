@@ -25,7 +25,7 @@ public class CashbackBenefit {
     private double rate;
     private double amount;
     private long minimumAmount;
-    private long benefitLimit;
+    private Long benefitLimit;
     
     @Enumerated(EnumType.STRING)
     private ChannelType channel;
@@ -37,7 +37,7 @@ public class CashbackBenefit {
     private Integer minimumSpending;
 
     @Builder
-    public CashbackBenefit(double rate, double amount, long minimumAmount, long benefitLimit, ChannelType channel, Benefit benefit, Integer minimumSpending) {
+    public CashbackBenefit(double rate, double amount, long minimumAmount, Long benefitLimit, ChannelType channel, Benefit benefit, Integer minimumSpending) {
         this.rate = rate;
         this.amount = amount;
         this.minimumAmount = minimumAmount;

@@ -8,21 +8,16 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.demo.benefit.dto.AvailableCardResponse;
+import com.example.demo.benefit.dto.BenefitResponse;
+import com.example.demo.benefit.dto.MatchingCardsResponse;
 import com.example.demo.benefit.entity.Benefit;
 import com.example.demo.benefit.application.dto.ChannelType;
-import com.example.demo.benefit.repository.BenefitRepository;
-import com.example.demo.card.entity.Card;
-import com.example.demo.card.repository.CardRepository;
-import com.example.demo.store.dto.OnlineStoreInfoDTO;
-import com.example.demo.benefit.application.dto.CashbackBenefitDTO;
-import com.example.demo.benefit.application.dto.DiscountBenefitDTO;
-import com.example.demo.benefit.application.dto.PointBenefitDTO;
-import com.example.demo.benefit.dto.AvailableCardResponse;
-import com.example.demo.benefit.dto.BenefitDetailDTO;
-import com.example.demo.benefit.dto.MatchingCardsResponse;
 import com.example.demo.benefit.entity.CashbackBenefit;
 import com.example.demo.benefit.entity.DiscountBenefit;
 import com.example.demo.benefit.entity.PointBenefit;
+import com.example.demo.card.entity.Card;
+import com.example.demo.store.dto.OnlineStoreInfoDTO;
 import com.example.demo.store.dto.OnlineStoreSearchResponse;
 import com.example.demo.store.dto.StoreInfoDTO;
 import com.example.demo.user.entity.UserCard;
@@ -60,7 +55,7 @@ public class OnlineStoreService {
         List<Map<String, Object>> kakaoStores = searchOnlineStoresFromKakao(category);
         
         // 3. 각 매장에 대해 온라인 카드 혜택 매칭
-        List<StoreInfoDTO> storesWithCards = storeCardMatchingService.matchStoresWithCards(kakaoStores, userCards, ChannelType.ONLINE);
+        List<StoreInfoDTO> storesWithCards = storeCardMatchingService.matchStoresWithCards(kakaoStores, userCards, userId, ChannelType.ONLINE);
         
         // 4. StoreInfoDTO를 OnlineStoreInfoDTO로 변환
         List<OnlineStoreInfoDTO> onlineStores = convertToOnlineStoreDTOs(storesWithCards);
@@ -130,8 +125,8 @@ public class OnlineStoreService {
                         .cardId(card.getId())
                         .cardName(card.getName())
                         .imgUrl(card.getImgUrl())
-                        .type(card.getType())
-                        .benefits(convertBenefitsToDTO(card.getBenefits()))
+                        .cardType(Card.CardType.valueOf(card.getType()))
+                        .benefits(convertBenefitsToResponseDTOs(card.getBenefits()))
                         .build())
                 .collect(Collectors.toList());
         
@@ -146,57 +141,45 @@ public class OnlineStoreService {
                 .anyMatch(benefit -> benefit.getApplicableTargets().contains(storeId));
     }
 
-    /**
-     * Benefit 리스트를 BenefitDetailDTO로 변환
-     */
-    private BenefitDetailDTO convertBenefitsToDTO(List<Benefit> benefits) {
-        List<DiscountBenefitDTO> discounts = new ArrayList<>();
-        List<PointBenefitDTO> points = new ArrayList<>();
-        List<CashbackBenefitDTO> cashbacks = new ArrayList<>();
-        List<String> applicableCategory = new ArrayList<>();
-        List<String> applicableTargets = new ArrayList<>();
-        String summary = new String();
-        
-        for (Benefit benefit : benefits) {
-            // 할인 혜택
-            for (DiscountBenefit discount : benefit.getDiscountBenefits()) {
-                discounts.add(DiscountBenefitDTO.builder()
-                        .rate(discount.getRate())
-                        .amount(discount.getAmount())
-                        .minimumAmount(discount.getMinimumAmount())
-                        .benefitLimit(discount.getBenefitLimit())
-                        .channel(discount.getChannel())
-                        .build());
+    private List<BenefitResponse> convertBenefitsToResponseDTOs(List<Benefit> benefits) {
+        List<BenefitResponse> benefitResponses = new ArrayList<>();
+
+        for(Benefit benefit : benefits){
+            for (DiscountBenefit db : benefit.getDiscountBenefits()){
+                benefitResponses.add(createBenefitResponse(benefit, db, "DISCOUNT"));
             }
-            
-            // 포인트 혜택
-            for (PointBenefit point : benefit.getPointBenefits()) {
-                points.add(PointBenefitDTO.builder()
-                        .rate(point.getRate())
-                        .minimumAmount(point.getMinimumAmount())
-                        .benefitLimit(point.getBenefitLimit())
-                        .channel(point.getChannel())
-                        .build());
+            for (PointBenefit pb : benefit.getPointBenefits()){
+                benefitResponses.add(createBenefitResponse(benefit, pb, "POINT"));
             }
-            
-            // 캐시백 혜택
-            for (CashbackBenefit cashback : benefit.getCashbackBenefits()) {
-                cashbacks.add(CashbackBenefitDTO.builder()
-                        .rate(cashback.getRate())
-                        .amount(cashback.getAmount())
-                        .minimumAmount(cashback.getMinimumAmount())
-                        .benefitLimit(cashback.getBenefitLimit())
-                        .channel(cashback.getChannel())
-                        .build());
+            for (CashbackBenefit cb : benefit.getCashbackBenefits()){
+                benefitResponses.add(createBenefitResponse(benefit, cb, "CASHBACK"));
             }
-            
-            // 적용 카테고리 및 대상
-            applicableCategory.addAll(benefit.getApplicableCategory());
-            applicableTargets.addAll(benefit.getApplicableTargets());
-            summary = benefit.getSummary();
         }
-        
-        return new BenefitDetailDTO(discounts, points, cashbacks, applicableCategory, applicableTargets, summary);
+        return benefitResponses;
+    }
+
+    private BenefitResponse createBenefitResponse(Benefit parent, Object child, String type) {
+        BenefitResponse.BenefitResponseBuilder builder = BenefitResponse.builder()
+                .benefitId(parent.getId())
+                .benefitType(type)
+                .summary(parent.getSummary());
+
+        if (child instanceof DiscountBenefit db) {
+            builder.minimumSpending(db.getMinimumSpending())
+                    .benefitLimit(db.getBenefitLimit())
+                    .rate(db.getRate())
+                    .amount(db.getAmount());
+        } else if (child instanceof PointBenefit pb) {
+            builder.minimumSpending(pb.getMinimumSpending())
+                    .benefitLimit(pb.getBenefitLimit())
+                    .rate(pb.getRate());
+        } else if (child instanceof CashbackBenefit cb) {
+            builder.minimumSpending(cb.getMinimumSpending())
+                    .benefitLimit( cb.getBenefitLimit())
+                    .rate(cb.getRate())
+                    .amount(cb.getAmount());
+        }
+        return builder.build();
     }
 
 }

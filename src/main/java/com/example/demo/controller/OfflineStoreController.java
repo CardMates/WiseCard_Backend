@@ -47,7 +47,7 @@ public class OfflineStoreController {
         log.info("🏪 카카오 API 검색 결과: {} 개 매장", stores.size());
 
         // 3. 각 매장에 대해 실제 카드 혜택 매칭
-        List<StoreInfoDTO> storesWithCards = storeCardMatchingService.matchStoresWithCards(stores, userCards);
+        List<StoreInfoDTO> storesWithCards = storeCardMatchingService.matchStoresWithCards(stores, userCards, userId);
         log.info("🎯 최종 매칭 결과: {} 개 매장", storesWithCards.size());
 
         return ResponseEntity.ok(new StoreSearchResponse(storesWithCards));
