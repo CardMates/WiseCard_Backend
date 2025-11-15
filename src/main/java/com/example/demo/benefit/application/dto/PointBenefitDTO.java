@@ -7,6 +7,8 @@ public record PointBenefitDTO(
         double rate,
         long minimumAmount,
         long benefitLimit,
-        ChannelType channel
+        ChannelType channel,
+        Integer minimumSpending,
+        String name
 ){
 }

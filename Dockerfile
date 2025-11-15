@@ -35,7 +35,7 @@ WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar app.jar
 
 # 포트 노출 (Spring Boot 기본 포트 + gRPC 포트)
-EXPOSE 8080 9091
+EXPOSE 8080 9090
 
 # 헬스체크 추가
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \

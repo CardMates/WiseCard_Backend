@@ -8,5 +8,7 @@ import lombok.Builder;
 public record StoreInfoDTO(
     String id,
     String placeName,
-    List<CardBenefitDTO> availableCards
+    List<CardBenefitDTO> availableCards,
+    Double lat,
+    Double lng
 ) {}

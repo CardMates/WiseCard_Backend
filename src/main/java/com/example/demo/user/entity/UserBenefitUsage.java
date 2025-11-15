@@ -2,7 +2,7 @@ package com.example.demo.user.entity;
 
 import java.time.LocalDateTime;
 
-import com.example.demo.benefit.entity.Benefit;
+import com.example.demo.auth.entity.Member;
 import com.example.demo.card.entity.Card;
 
 import jakarta.persistence.Column;
@@ -14,7 +14,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,19 +28,21 @@ public class UserBenefitUsage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long userId; 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "card_id", nullable = false)
-    private Card card; 
+    private Card card;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "benefit_id", nullable = false)
-    private Benefit benefit; 
-
+    // 어떤 하위 혜택(Discount, Point 등)을 사용했는지 식별하기 위한 ID
     @Column(nullable = false)
-    private String benefitType; // DISCOUNT, POINT, CASHBACK
+    private Long benefitDetailId;
+
+    // 혜택의 종류를 구분 ("DISCOUNT", "POINT", "CASHBACK")
+    @Column(nullable = false)
+    private String benefitType;
 
     @Column(nullable = false)
     private Long usedAmount; // 사용한 혜택 금액
@@ -52,21 +53,22 @@ public class UserBenefitUsage {
     @Column(nullable = false)
     private String place; // 사용 장소
 
+    // 혜택을 사용한 거래 일시
     @Column(nullable = false)
-    private LocalDateTime usedAt; // 사용 시간
+    private LocalDateTime transactionDate;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Builder
-    public UserBenefitUsage(Long id, Long userId, Card card, Benefit benefit, String benefitType, Long usedAmount, Long remainingLimit, String place, LocalDateTime usedAt) {
-        this.id = id;
-        this.userId = userId;
+    public UserBenefitUsage(Member member, Card card, Long benefitDetailId, String benefitType, Long usedAmount, Long remainingLimit, String place, LocalDateTime usedAt) {
+        this.member = member;
         this.card = card;
-        this.benefit = benefit;
+        this.benefitDetailId = benefitDetailId;
         this.benefitType = benefitType;
         this.usedAmount = usedAmount;
         this.remainingLimit = remainingLimit;
         this.place = place;
+        this.transactionDate = usedAt;
+
     }
 }
 

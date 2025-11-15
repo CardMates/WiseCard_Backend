@@ -3,6 +3,7 @@ package com.example.demo.user.repository;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.demo.card.entity.Card;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -33,4 +34,6 @@ public interface UserCardRepository extends JpaRepository<UserCard, Long> {
      * 사용자와 카드의 등록 여부 확인
      */
     boolean existsByUserIdAndCard_IdAndIsActiveTrue(Long userId, Long cardId);
+
+    List<Card> findByUserId(Long userId);
 }

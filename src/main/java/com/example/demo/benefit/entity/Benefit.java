@@ -6,18 +6,7 @@ import java.util.Optional;
 
 import com.example.demo.card.entity.Card;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,7 +22,7 @@ public class Benefit {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "card_id")
-    private Card cardId;
+    private Card card;
 
     @ElementCollection
     @CollectionTable(name = "benefit_applicable_categories", joinColumns = @JoinColumn(name = "benefit_id"))
@@ -54,17 +43,17 @@ public class Benefit {
     @OneToMany(mappedBy = "benefit", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<CashbackBenefit> cashbackBenefits = new ArrayList<>();
 
-    @Column(unique = true)
-    private Long externalId;
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String summary;
 
     @Builder
-    public Benefit(Card cardId, List<String> applicableCategory, List<String> applicableTargets, Long externalId) {
-        this.cardId = cardId;
+    public Benefit(List<String> applicableCategory, List<String> applicableTargets, String summary, Card card) {
         this.applicableCategory = applicableCategory;
         this.applicableTargets = applicableTargets;
-        this.externalId = externalId;
+        this.summary = summary;
+        this.card = card;
     }
-
 
 }
 

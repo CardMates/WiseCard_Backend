@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.example.demo.benefit.entity.Benefit;
+import com.example.demo.card.entity.CardBenefit;
 
 import jakarta.persistence.LockModeType;
 import org.springframework.stereotype.Repository;
@@ -25,8 +26,9 @@ public interface BenefitRepository extends JpaRepository<Benefit, Long> {
     List<Benefit> findByApplicableTargetsContaining(@Param("storeName") String storeName);
 
 
-    @Query("SELECT b FROM Benefit b WHERE b.cardId.id = :cardId AND :place MEMBER OF b.applicableTargets")
+    @Query("SELECT b FROM Benefit b " +
+           "JOIN CardBenefit cb ON b.id = cb.benefit.id " +
+           "WHERE cb.card.id = :cardId AND :place MEMBER OF b.applicableTargets")
     List<Benefit> findByCardIdAndPlace(@Param("cardId") Long cardId, @Param("place") String place);
 
-    Optional<Benefit> findByExternalId(Long externalId);
 }

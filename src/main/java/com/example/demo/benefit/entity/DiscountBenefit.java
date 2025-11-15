@@ -15,10 +15,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Entity
 @NoArgsConstructor
 @Getter
-@Setter
 public class DiscountBenefit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +28,8 @@ public class DiscountBenefit {
     private double rate;
     private double amount;
     private double minimumAmount;
-    private double benefitLimit;
+    private Long benefitLimit;
+    private Integer minimumSpending;
     
     @Enumerated(EnumType.STRING)
     private ChannelType channel;
@@ -36,10 +38,8 @@ public class DiscountBenefit {
     @JoinColumn(name = "benefit_id")
     private Benefit benefit;
 
-    private Long externalId;
-
     @Builder
-    public DiscountBenefit(Long id, double rate, double amount, double minimumAmount, double benefitLimit, ChannelType channel, Benefit benefit, Long externalId) {
+    public DiscountBenefit(Long id, double rate, double amount, double minimumAmount, Long benefitLimit, ChannelType channel, Benefit benefit, Integer minimumSpending) {
         this.id = id;
         this.rate = rate;
         this.amount = amount;
@@ -47,7 +47,7 @@ public class DiscountBenefit {
         this.benefitLimit = benefitLimit;
         this.channel = channel;
         this.benefit = benefit;
-        this.externalId = externalId;
+        this.minimumSpending = minimumSpending;
     }
 
 }
